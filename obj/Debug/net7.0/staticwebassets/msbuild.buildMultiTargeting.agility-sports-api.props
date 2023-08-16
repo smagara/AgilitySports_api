@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\agility-sports-api.props" />
+</Project>

@@ -1,0 +1,2 @@
+### current version
+get http://localhost:1106/api/version
