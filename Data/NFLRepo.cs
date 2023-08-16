@@ -1,6 +1,8 @@
 using AgilitySportsAPI.Models;
 using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
+using AgilitySportsAPI.Dtos;
+using Dapper;
 
 namespace AgilitySportsAPI.Data;
 public class NFLRepo : INFLRepo
@@ -21,6 +23,27 @@ public class NFLRepo : INFLRepo
             return await connection.GetAllAsync<NFLRoster>();
         }
 
+    }
+
+        public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster()
+    {
+                var sql = @"
+select 
+  Team
+, Name
+, Position
+, Number
+, Height
+, Weight
+, AgeExact
+, College
+from NFL.Roster
+order by 
+  1, 3, 2";
+        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            return await connection.QueryAsync<NFLRosterDto>(sql);
+        }
     }
 
     #endregion
