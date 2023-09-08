@@ -1,2 +1,2 @@
-### current version
+### current version.  3 hash characters indicates an API to be tested.
 get http://localhost:1106/api/version

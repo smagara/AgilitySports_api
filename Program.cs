@@ -6,7 +6,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
+
+builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
+
+app.UseCors(builder => builder // CORS remedy
+.AllowAnyOrigin()
+.AllowAnyMethod()
+.AllowAnyHeader()
+);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -17,20 +25,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var all = app.MapGroup("api");
-
-var NFL = all.MapGroup("nfl");
-var PGA = all.MapGroup("pga");
 
 #region Version
-
+var all = app.MapGroup("api");
 all.MapGet("version", () => "0.1.0");
-
 #endregion
-
 
 #region NFL
 
+var NFL = all.MapGroup("nfl");
+var PGA = all.MapGroup("pga");
 NFL.MapGet("roster/all", async (INFLRepo repo) => {
     return Results.Ok(await repo.GetAllNFLRoster());
 });

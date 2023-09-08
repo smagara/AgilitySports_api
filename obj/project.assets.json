@@ -2532,11 +2532,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Train\\fullstack\\agility-sports-api\\agility-sports-api.csproj",
+      "projectUniqueName": "C:\\train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj",
       "projectName": "agility-sports-api",
-      "projectPath": "C:\\Train\\fullstack\\agility-sports-api\\agility-sports-api.csproj",
+      "projectPath": "C:\\train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj",
       "packagesPath": "C:\\Users\\smaga\\.nuget\\packages\\",
-      "outputPath": "C:\\Train\\fullstack\\agility-sports-api\\obj\\",
+      "outputPath": "C:\\train\\fullstack\\AgilitySports_api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\smaga\\AppData\\Roaming\\NuGet\\NuGet.Config"
