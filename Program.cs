@@ -5,8 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// add all new APIs here
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
+builder.Services.AddScoped<INBARepo, NBARepo>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
@@ -57,6 +60,17 @@ NHL.MapGet("roster/all", async (INHLRepo repoNHL) => {
 
 NHL.MapGet("roster", async (INHLRepo repo) => {
     return Results.Ok(await repo.GetNHLRoster());
+});
+#endregion
+
+#region NBA
+var NBA = all.MapGroup("nba");
+NBA.MapGet("roster/all", async (INBARepo repoNBA) => {
+    return Results.Ok(await repoNBA.GetAllNBARoster());
+});
+
+NBA.MapGet("roster", async (INBARepo repo) => {
+    return Results.Ok(await repo.GetNBARoster());
 });
 #endregion
 
