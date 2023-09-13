@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZYY4O/ot1loZ+d4sLji+Nwtr4pDm6NYI2wqK0YrVRFB8XPfjYu+gcfR8SP8RI5DT4m3s3ubFdyqs45feq+PABg==",
+  "dgSpecHash": "jZQQaYNj87LZTL4MjNP91J3e2/nmKVjSDX5Z+U7MThyprSJ+xM1HYnRn7tZROjzeMNGoHyqmVZPJUY5Mw7iy8Q==",
   "success": true,
-  "projectFilePath": "C:\\train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj",
+  "projectFilePath": "C:\\train\\fullstack\\agilitysports_api\\agility-sports-api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\smaga\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\smaga\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

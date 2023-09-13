@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
+builder.Services.AddScoped<INHLRepo, NHLRepo>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
@@ -34,7 +35,6 @@ all.MapGet("version", () => "0.1.0");
 #region NFL
 
 var NFL = all.MapGroup("nfl");
-var PGA = all.MapGroup("pga");
 NFL.MapGet("roster/all", async (INFLRepo repo) => {
     return Results.Ok(await repo.GetAllNFLRoster());
 });
@@ -45,9 +45,21 @@ NFL.MapGet("roster", async (INFLRepo repo) => {
 
 #endregion
 
+#region PGA
+var PGA = all.MapGroup("pga");
+#endregion
+
+#region NHL
+var NHL = all.MapGroup("nhl");
+NHL.MapGet("roster/all", async (INHLRepo repoNHL) => {
+    return Results.Ok(await repoNHL.GetAllNHLRoster());
+});
+
+NHL.MapGet("roster", async (INHLRepo repo) => {
+    return Results.Ok(await repo.GetNHLRoster());
+});
+#endregion
+
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
