@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
+builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
@@ -50,6 +51,17 @@ NFL.MapGet("roster", async (INFLRepo repo) => {
 
 #region PGA
 var PGA = all.MapGroup("pga");
+#endregion
+
+#region MLB
+var MLB = all.MapGroup("mlb");
+MLB.MapGet("roster/all", async (IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetAllMLBRoster());
+});
+
+MLB.MapGet("roster", async (IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBRoster());
+});
 #endregion
 
 #region NHL

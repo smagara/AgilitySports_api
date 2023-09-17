@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\train\\fullstack\\agilitysports_api\\agility-sports-api.csproj": {}
+    "C:\\Train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj": {}
   },
   "projects": {
-    "C:\\train\\fullstack\\agilitysports_api\\agility-sports-api.csproj": {
+    "C:\\Train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\train\\fullstack\\agilitysports_api\\agility-sports-api.csproj",
+        "projectUniqueName": "C:\\Train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj",
         "projectName": "agility-sports-api",
-        "projectPath": "C:\\train\\fullstack\\agilitysports_api\\agility-sports-api.csproj",
+        "projectPath": "C:\\Train\\fullstack\\AgilitySports_api\\agility-sports-api.csproj",
         "packagesPath": "C:\\Users\\smaga\\.nuget\\packages\\",
-        "outputPath": "C:\\train\\fullstack\\agilitysports_api\\obj\\",
+        "outputPath": "C:\\Train\\fullstack\\AgilitySports_api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\smaga\\AppData\\Roaming\\NuGet\\NuGet.Config"
