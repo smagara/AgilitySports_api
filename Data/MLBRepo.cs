@@ -14,7 +14,7 @@ public class MLBRepo : IMLBRepo
         this.configuration = configuration;
     }
 
-    #region NHL
+    #region MLB.Roster
 
     public async Task<IEnumerable<MLBRoster>> GetAllMLBRoster()
     {
@@ -25,9 +25,9 @@ public class MLBRepo : IMLBRepo
 
     }
 
-        public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster()
+    public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster()
     {
-                var sql = @"
+        var sql = @"
 select 
     PlayerId
     ,FirstName
@@ -51,5 +51,32 @@ order by
         }
     }
 
+    #endregion
+
+    #region MLB.Attendance
+    public async Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance()
+    {
+        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            return await connection.GetAllAsync<MLBAttendance>();
+        }
+    }
+
+    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance()
+    {
+        var sql = @"
+        select 
+            yearId
+            ,teamId
+            ,teamName
+            ,parkName
+            ,attendance
+        from MLB.Attendance
+        order by yearId, teamId";
+        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            return await connection.QueryAsync<MLBAttendanceDto>(sql);
+        }
+    }
     #endregion
 }

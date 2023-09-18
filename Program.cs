@@ -62,6 +62,14 @@ MLB.MapGet("roster/all", async (IMLBRepo repoBaseball) => {
 MLB.MapGet("roster", async (IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetMLBRoster());
 });
+
+MLB.MapGet("attendance/all", async (IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetAllMLBAttendance());
+});
+
+MLB.MapGet("attendance", async (IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBAttendance());
+});
 #endregion
 
 #region NHL

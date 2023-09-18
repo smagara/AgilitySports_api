@@ -5,3 +5,9 @@ get {{url}}mlb/roster/all
 
 ### list players
 get http://localhost:1106/api/mlb/roster
+
+### get all attendance
+get {{url}}mlb/attendance/all
+
+### list attendance stats
+get http://localhost:1106/api/mlb/attendance

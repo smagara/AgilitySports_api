@@ -7,7 +7,9 @@ public interface IMLBRepo
     #region MLB
 
     Task<IEnumerable<MLBRoster>> GetAllMLBRoster();
-    Task<IEnumerable<MLBRosterDto>> GetMLBRoster();
+    Task<IEnumerable<MLBRosterDto>> GetMLBRoster();    
+    Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance();
+    Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance();
 
     #endregion
 }
