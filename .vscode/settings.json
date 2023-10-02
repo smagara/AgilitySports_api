@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/d21c5a0b-cc5b-43c0-b61c-c6507dbb83dc/resourceGroups/AngularHosting/providers/Microsoft.Web/sites/AgilitySportsAPI",
+    "appService.deploySubpath": "bin\\deploy\\publish"
+}

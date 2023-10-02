@@ -1,5 +1,6 @@
 using AgilitySportsAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
+var alwaysSwagger = true;
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -22,7 +23,7 @@ app.UseCors(builder => builder // CORS remedy
 );
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (alwaysSwagger || app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
