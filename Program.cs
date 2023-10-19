@@ -68,9 +68,11 @@ MLB.MapGet("attendance/all", async (IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetAllMLBAttendance());
 });
 
-MLB.MapGet("attendance", async (IMLBRepo repoBaseball) => {
-    return Results.Ok(await repoBaseball.GetMLBAttendance());
+// optional Year parameter
+MLB.MapGet("attendance", async (short? yearId, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBAttendance(yearId));
 });
+
 #endregion
 
 #region NHL
