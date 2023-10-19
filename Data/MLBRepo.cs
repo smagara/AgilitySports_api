@@ -62,7 +62,7 @@ order by
         }
     }
 
-    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance()
+    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(short? year = null)
     {
         var sql = @"
         select 
@@ -71,11 +71,13 @@ order by
             ,teamName
             ,parkName
             ,attendance
-        from MLB.Attendance
+        from MLB.Attendance 
+        where (@yearId IS NULL OR yearId = @yearId)
         order by yearId, teamId";
+
         using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
-            return await connection.QueryAsync<MLBAttendanceDto>(sql);
+            return await connection.QueryAsync<MLBAttendanceDto>(sql, new {yearId=year, year});
         }
     }
     #endregion

@@ -9,7 +9,7 @@ public interface IMLBRepo
     Task<IEnumerable<MLBRoster>> GetAllMLBRoster();
     Task<IEnumerable<MLBRosterDto>> GetMLBRoster();    
     Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance();
-    Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance();
-
+    Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(short? year);
+    
     #endregion
 }
