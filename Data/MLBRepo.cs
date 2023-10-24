@@ -3,6 +3,9 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
+//using System.Text.Json;
+using AgilitySportsAPI.Utilities;
+
 
 namespace AgilitySportsAPI.Data;
 public class MLBRepo : IMLBRepo
@@ -80,5 +83,53 @@ order by
             return await connection.QueryAsync<MLBAttendanceDto>(sql, new {yearId=year, year});
         }
     }
+    #endregion
+
+    #region chart
+ 
+    // construct a PrimeNG chart data feed to bring the data to life
+    public async Task<MLBAttendChartDTO> GetMLBChart(short? year)
+    {
+        MLBAttendChartDTO mlbChart = new MLBAttendChartDTO();
+        ColorWheel colors = new ColorWheel();
+
+        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            var sql = @"
+                select 
+                    yearId
+                    ,teamName
+                    ,attendance
+                from MLB.Attendance 
+                where @yearId IS NULL OR yearId = @yearId
+                Order by attendance desc";
+
+            // begin to assemble our chart payload
+            mlbChart.datasets = new List<Dataset>();
+
+            // run the query
+            IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new {yearId=year, year});
+
+            foreach(var team in chartData)
+            {
+                Dataset myChartData = new Dataset
+                {
+                    label = team.TeamName ?? "",
+                    backgroundColor = colors.Next(),
+                    borderColor = "darkgray",
+                    borderWidth = "1",
+                    data = new List<string>{team.Attendance?.ToString() ?? ""}
+                };
+
+                mlbChart.datasets.Add(myChartData);
+            }
+         }
+
+        mlbChart.labels = new List<string> { "Baseball Attendance " + year ?? "" };
+        //Console.WriteLine("GetMLBChart " +  JsonSerializer.Serialize (mlbChart));
+
+        return mlbChart;
+
+    }    
     #endregion
 }
