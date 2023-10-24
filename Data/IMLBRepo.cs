@@ -10,6 +10,6 @@ public interface IMLBRepo
     Task<IEnumerable<MLBRosterDto>> GetMLBRoster();    
     Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance();
     Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(short? year);
-    
+    Task<MLBAttendChartDTO> GetMLBChart(short? year);    
     #endregion
 }
