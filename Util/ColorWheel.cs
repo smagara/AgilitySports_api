@@ -1,6 +1,6 @@
 namespace AgilitySportsAPI.Utilities;
 
-public class ColorWheel
+public class ColorWheel : IColorWheel
 {
     List<string> colorWheel;
     private int currentColor = 0;

@@ -1,4 +1,5 @@
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Utilities;
 var builder = WebApplication.CreateBuilder(args);
 var alwaysSwagger = true;
 const short defaultChartYear = 2019;
@@ -12,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
+builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'

@@ -11,3 +11,6 @@ get {{url}}mlb/attendance/all
 
 ### list attendance stats
 get http://localhost:1106/api/mlb/attendance
+
+### hydrate a PrimeNG chart with MLB Attendance
+get http://localhost:1106/api/mlb/chart?yearId=1984

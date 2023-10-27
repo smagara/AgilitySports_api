@@ -11,10 +11,12 @@ namespace AgilitySportsAPI.Data;
 public class MLBRepo : IMLBRepo
 {
     private readonly IConfiguration configuration;
+    private readonly IColorWheel colors;
 
-    public MLBRepo(IConfiguration configuration)
+    public MLBRepo(IConfiguration configuration, IColorWheel colors)
     {
         this.configuration = configuration;
+        this.colors = colors;
     }
 
     #region MLB.Roster
@@ -91,7 +93,6 @@ order by
     public async Task<MLBAttendChartDTO> GetMLBChart(short? year)
     {
         MLBAttendChartDTO mlbChart = new MLBAttendChartDTO();
-        ColorWheel colors = new ColorWheel();
 
         using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
