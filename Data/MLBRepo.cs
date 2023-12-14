@@ -132,5 +132,43 @@ order by
         return mlbChart;
 
     }    
+
+// construct a PrimeNG chart data feed for attendance over the decades
+    public async Task<MLBAttendChartDTO> GetMLBDecades(short? beginDecade = 1920, short? endDecade = 2010)
+    {
+        MLBAttendChartDTO mlbDecs = new MLBAttendChartDTO();
+
+        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        {
+            var sql = @"
+                EXEC MLB.[attendanceReportSproc] @begin, @end;";
+
+            // begin to assemble our chart payload
+            mlbDecs.datasets = new List<Dataset>();
+
+            // run the query
+            IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new {begin=beginDecade, end=endDecade});
+
+            foreach(var dec in chartData)
+            {
+                Dataset myChartData = new Dataset
+                {
+                    label = dec.YearId.ToString() + "'s" ?? "",
+                    backgroundColor = colors.Next(),
+                    borderColor = "darkgray",
+                    borderWidth = "1",
+                    data = new List<string>{dec.Attendance?.ToString() ?? ""}
+                };
+
+                mlbDecs.datasets.Add(myChartData);
+            }
+         }
+
+        mlbDecs.labels = new List<string> { "Baseball Attendance " + beginDecade + "'s -- " + endDecade + "'s" };
+        //Console.WriteLine("GetMLBChart " +  JsonSerializer.Serialize (mlbDecs));
+
+        return mlbDecs;
+
+    }        
     #endregion
 }

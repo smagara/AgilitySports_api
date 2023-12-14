@@ -3,6 +3,8 @@ using AgilitySportsAPI.Utilities;
 var builder = WebApplication.CreateBuilder(args);
 var alwaysSwagger = true;
 const short defaultChartYear = 2019;
+const short defaultDecadesBegin = 1920;
+const short defaultDecadesEnd = 2010;
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,6 +80,10 @@ MLB.MapGet("attendance", async (short? yearId, IMLBRepo repoBaseball) => {
 
 MLB.MapGet("chart", async (short? yearId, IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetMLBChart(yearId ?? defaultChartYear));
+});
+
+MLB.MapGet("decades", async (short? beginDecade, short? endDecade, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBDecades(beginDecade ?? defaultDecadesBegin, endDecade ?? defaultDecadesEnd));
 });
 
 #endregion
