@@ -7,7 +7,7 @@ public interface INHLRepo
     #region NHL
 
     Task<IEnumerable<NHLRoster>> GetAllNHLRoster();
-    Task<IEnumerable<NHLRosterDto>> GetNHLRoster();
+    Task<IEnumerable<NHLRosterDto>> GetNHLRoster(ILogger<NHLRoster> logger);
 
     #endregion
 }

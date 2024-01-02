@@ -14,8 +14,6 @@ public class NBARepo : INBARepo
         this.configuration = configuration;
     }
 
-    #region NFL
-
     public async Task<IEnumerable<NBARoster>> GetAllNBARoster()
     {
         using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -25,8 +23,10 @@ public class NBARepo : INBARepo
 
     }
 
-        public async Task<IEnumerable<NBARosterDto>> GetNBARoster()
+        public async Task<IEnumerable<NBARosterDto>> GetNBARoster(ILogger<NBARoster> logger)
     {
+        logger.LogInformation("Fetching NBA Roster");
+ 
                 var sql = @"
 select playerID
       ,FirstName
@@ -47,5 +47,4 @@ order by
         }
     }
 
-    #endregion
 }

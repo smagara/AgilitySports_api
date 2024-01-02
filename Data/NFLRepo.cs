@@ -25,8 +25,10 @@ public class NFLRepo : INFLRepo
 
     }
 
-        public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster()
+        public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster(ILogger<NFLRepo> logger)
     {
+        logger.LogInformation("Fetching NFL Roster");
+        
                 var sql = @"
 select 
   Team

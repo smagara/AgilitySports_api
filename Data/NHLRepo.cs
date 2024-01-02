@@ -25,8 +25,11 @@ public class NHLRepo : INHLRepo
 
     }
 
-        public async Task<IEnumerable<NHLRosterDto>> GetNHLRoster()
+        public async Task<IEnumerable<NHLRosterDto>> GetNHLRoster(ILogger<NHLRoster> logger)
     {
+
+        logger.LogInformation("Fetching NHL Roster");
+
                 var sql = @"
 select 
     Name

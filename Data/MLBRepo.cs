@@ -13,7 +13,7 @@ public class MLBRepo : IMLBRepo
     private readonly IConfiguration configuration;
     private readonly IColorWheel colors;
 
-    public MLBRepo(IConfiguration configuration, IColorWheel colors)
+    public MLBRepo(ILogger<MLBRoster> logger, IConfiguration configuration, IColorWheel colors)
     {
         this.configuration = configuration;
         this.colors = colors;
@@ -30,7 +30,7 @@ public class MLBRepo : IMLBRepo
 
     }
 
-    public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster()
+    public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster(ILogger<MLBRoster> logger)
     {
         var sql = @"
 select 
@@ -67,8 +67,10 @@ order by
         }
     }
 
-    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(short? year = null)
+    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBRoster> logger, short? year = null)
     {
+        logger.LogInformation($"Fetching MLB Attendance Grid for year {year}");
+
         var sql = @"
         select 
             yearId
@@ -90,10 +92,13 @@ order by
     #region chart
  
     // construct a PrimeNG chart data feed to bring the data to life
-    public async Task<MLBAttendChartDTO> GetMLBChart(short? year)
+    public async Task<MLBAttendChartDTO> GetMLBChart(ILogger<MLBRoster> logger, short? year)
     {
         MLBAttendChartDTO mlbChart = new MLBAttendChartDTO();
+        logger.LogInformation($"Fetching MLB Attendance Chart for year {year}");
 
+        try
+        {
         using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
         {
             var sql = @"
@@ -128,47 +133,13 @@ order by
 
         mlbChart.labels = new List<string> { "Baseball Attendance " + year ?? "" };
         //Console.WriteLine("GetMLBChart " +  JsonSerializer.Serialize (mlbChart));
-
+        }
+        catch(Exception ex)
+        {
+            logger.LogError($"Error fetching MLB Attendance chart JSON: {ex.Message}");
+        }
         return mlbChart;
 
     }    
-
-// construct a PrimeNG chart data feed for attendance over the decades
-    public async Task<MLBAttendChartDTO> GetMLBDecades(short? beginDecade = 1920, short? endDecade = 2010)
-    {
-        MLBAttendChartDTO mlbDecs = new MLBAttendChartDTO();
-
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
-        {
-            var sql = @"
-                EXEC MLB.[attendanceReportSproc] @begin, @end;";
-
-            // begin to assemble our chart payload
-            mlbDecs.datasets = new List<Dataset>();
-
-            // run the query
-            IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new {begin=beginDecade, end=endDecade});
-
-            foreach(var dec in chartData)
-            {
-                Dataset myChartData = new Dataset
-                {
-                    label = dec.YearId.ToString() + "'s" ?? "",
-                    backgroundColor = colors.Next(),
-                    borderColor = "darkgray",
-                    borderWidth = "1",
-                    data = new List<string>{dec.Attendance?.ToString() ?? ""}
-                };
-
-                mlbDecs.datasets.Add(myChartData);
-            }
-         }
-
-        mlbDecs.labels = new List<string> { "Baseball Attendance " + beginDecade + "'s -- " + endDecade + "'s" };
-        //Console.WriteLine("GetMLBChart " +  JsonSerializer.Serialize (mlbDecs));
-
-        return mlbDecs;
-
-    }        
     #endregion
 }

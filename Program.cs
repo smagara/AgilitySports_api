@@ -1,4 +1,5 @@
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Utilities;
 var builder = WebApplication.CreateBuilder(args);
 var alwaysSwagger = true;
@@ -10,6 +11,16 @@ const short defaultDecadesEnd = 2010;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add support for Log4Net logging
+//builder.Logging.ClearProviders();
+ILoggingBuilder logB = builder.Logging.AddLog4Net(
+    new Log4NetProviderOptions()
+        {
+            Log4NetConfigFileName = "log4net.config"
+        }
+    );
+
 
 // add all new APIs here
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
@@ -49,8 +60,8 @@ NFL.MapGet("roster/all", async (INFLRepo repo) => {
     return Results.Ok(await repo.GetAllNFLRoster());
 });
 
-NFL.MapGet("roster", async (INFLRepo repo) => {
-    return Results.Ok(await repo.GetNFLRoster());
+NFL.MapGet("roster", async (INFLRepo repo, ILogger<NFLRepo> logger) => {
+    return Results.Ok(await repo.GetNFLRoster(logger));
 });
 
 #endregion
@@ -61,41 +72,37 @@ var PGA = all.MapGroup("pga");
 
 #region MLB
 var MLB = all.MapGroup("mlb");
-MLB.MapGet("roster/all", async (IMLBRepo repoBaseball) => {
+MLB.MapGet("roster/all", async (ILogger<MLBRoster> logger, IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetAllMLBRoster());
 });
 
-MLB.MapGet("roster", async (IMLBRepo repoBaseball) => {
-    return Results.Ok(await repoBaseball.GetMLBRoster());
+MLB.MapGet("roster", async (ILogger<MLBRoster> logger, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBRoster(logger));
 });
 
-MLB.MapGet("attendance/all", async (IMLBRepo repoBaseball) => {
+MLB.MapGet("attendance/all", async (ILogger<MLBRoster> logger, IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetAllMLBAttendance());
 });
 
 // optional Year parameter
-MLB.MapGet("attendance", async (short? yearId, IMLBRepo repoBaseball) => {
-    return Results.Ok(await repoBaseball.GetMLBAttendance(yearId));
+MLB.MapGet("attendance", async (ILogger<MLBRoster> logger, short? yearId, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBAttendance(logger, yearId));
 });
 
-MLB.MapGet("chart", async (short? yearId, IMLBRepo repoBaseball) => {
-    return Results.Ok(await repoBaseball.GetMLBChart(yearId ?? defaultChartYear));
-});
-
-MLB.MapGet("decades", async (short? beginDecade, short? endDecade, IMLBRepo repoBaseball) => {
-    return Results.Ok(await repoBaseball.GetMLBDecades(beginDecade ?? defaultDecadesBegin, endDecade ?? defaultDecadesEnd));
+MLB.MapGet("chart", async (ILogger<MLBRoster> logger, short? yearId, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBChart(logger, yearId ?? defaultChartYear));
 });
 
 #endregion
 
 #region NHL
 var NHL = all.MapGroup("nhl");
-NHL.MapGet("roster/all", async (INHLRepo repoNHL) => {
+NHL.MapGet("roster/all", async (ILogger<NHLRoster> logger, INHLRepo repoNHL) => {
     return Results.Ok(await repoNHL.GetAllNHLRoster());
 });
 
-NHL.MapGet("roster", async (INHLRepo repo) => {
-    return Results.Ok(await repo.GetNHLRoster());
+NHL.MapGet("roster", async (ILogger<NHLRoster> logger, INHLRepo repo) => {
+    return Results.Ok(await repo.GetNHLRoster(logger));
 });
 #endregion
 
@@ -104,9 +111,8 @@ var NBA = all.MapGroup("nba");
 NBA.MapGet("roster/all", async (INBARepo repoNBA) => {
     return Results.Ok(await repoNBA.GetAllNBARoster());
 });
-
-NBA.MapGet("roster", async (INBARepo repo) => {
-    return Results.Ok(await repo.GetNBARoster());
+NBA.MapGet("roster", async (ILogger<NBARoster> logger, INBARepo repo) => {
+    return Results.Ok(await repo.GetNBARoster(logger));
 });
 #endregion
 
