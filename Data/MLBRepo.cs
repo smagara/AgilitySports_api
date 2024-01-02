@@ -67,7 +67,7 @@ order by
         }
     }
 
-    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBRoster> logger, short? year = null)
+    public async Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBAttendanceDto> logger, short? year = null)
     {
         logger.LogInformation($"Fetching MLB Attendance Grid for year {year}");
 
@@ -92,10 +92,10 @@ order by
     #region chart
  
     // construct a PrimeNG chart data feed to bring the data to life
-    public async Task<MLBAttendChartDTO> GetMLBChart(ILogger<MLBRoster> logger, short? year)
+    public async Task<MLBAttendChartDTO> GetMLBChart(ILogger<MLBAttendChartDTO> logger, short? year)
     {
         MLBAttendChartDTO mlbChart = new MLBAttendChartDTO();
-        logger.LogInformation($"Fetching MLB Attendance Chart for year {year}");
+        logger.LogInformation("Fetching MLB Attendance Chart for year {year}", year);
 
         try
         {
@@ -136,10 +136,49 @@ order by
         }
         catch(Exception ex)
         {
-            logger.LogError($"Error fetching MLB Attendance chart JSON: {ex.Message}");
+            logger.LogError("Error fetching MLB Attendance chart JSON: {theError}", ex.Message);
         }
         return mlbChart;
 
-    }    
+    }
+
+    // construct a PrimeNG chart data feed for attendance over the decades
+    public async Task<MLBAttendChartDTO> GetMLBDecades(ILogger<MLBAttendChartDTO> logger, short? beginDecade = 1920, short? endDecade = 2010)
+    {
+        MLBAttendChartDTO mlbDecs = new MLBAttendChartDTO();
+        logger.LogInformation("Fetching MLB Decade Attendance for years {beginDecade} to {endDecade}", beginDecade, endDecade);
+        try
+        {
+            using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            {
+                var sql = @"
+                EXEC MLB.[attendanceReportSproc] @begin, @end;";
+                // begin to assemble our chart payload
+                mlbDecs.datasets = new List<Dataset>();
+                // run the query
+                IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new { begin = beginDecade, end = endDecade });
+                foreach (var dec in chartData)
+                {
+                    Dataset myChartData = new Dataset
+                    {
+                        label = dec.YearId.ToString() + "'s" ?? "",
+                        backgroundColor = colors.Next(),
+                        borderColor = "darkgray",
+                        borderWidth = "1",
+                        data = new List<string> { dec.Attendance?.ToString() ?? "" }
+                    };
+                    mlbDecs.datasets.Add(myChartData);
+                }
+            }
+            mlbDecs.labels = new List<string> { "Baseball Attendance " + beginDecade + "'s -- " + endDecade + "'s" };
+            //Console.WriteLine("GetMLBChart " +  JsonSerializer.Serialize (mlbDecs));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error fetching MLB Attendance Decades chart JSON: {theError}", ex.Message);
+        }
+        return mlbDecs;
+    }
+
     #endregion
 }

@@ -9,7 +9,8 @@ public interface IMLBRepo
     Task<IEnumerable<MLBRoster>> GetAllMLBRoster();
     Task<IEnumerable<MLBRosterDto>> GetMLBRoster(ILogger<MLBRoster> logger);    
     Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance();
-    Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBRoster> logger, short? year);
-    Task<MLBAttendChartDTO> GetMLBChart(ILogger<MLBRoster> logger, short? year);      
+    Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBAttendanceDto> logger, short? year);
+    Task<MLBAttendChartDTO> GetMLBChart(ILogger<MLBAttendChartDTO> logger, short? year); 
+    Task<MLBAttendChartDTO> GetMLBDecades(ILogger<MLBAttendChartDTO> logger, short? beginDecade, short? endDecade);   
      #endregion
 }

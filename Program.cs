@@ -1,4 +1,5 @@
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Dtos;
 using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Utilities;
 var builder = WebApplication.CreateBuilder(args);
@@ -85,14 +86,17 @@ MLB.MapGet("attendance/all", async (ILogger<MLBRoster> logger, IMLBRepo repoBase
 });
 
 // optional Year parameter
-MLB.MapGet("attendance", async (ILogger<MLBRoster> logger, short? yearId, IMLBRepo repoBaseball) => {
+MLB.MapGet("attendance", async (ILogger<MLBAttendanceDto> logger, short? yearId, IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetMLBAttendance(logger, yearId));
 });
 
-MLB.MapGet("chart", async (ILogger<MLBRoster> logger, short? yearId, IMLBRepo repoBaseball) => {
+MLB.MapGet("chart", async (ILogger<MLBAttendChartDTO> logger, short? yearId, IMLBRepo repoBaseball) => {
     return Results.Ok(await repoBaseball.GetMLBChart(logger, yearId ?? defaultChartYear));
 });
 
+MLB.MapGet("decades", async (ILogger<MLBAttendChartDTO> logger, short? beginDecade, short? endDecade, IMLBRepo repoBaseball) => {
+    return Results.Ok(await repoBaseball.GetMLBDecades(logger, beginDecade ?? defaultDecadesBegin, endDecade ?? defaultDecadesEnd));
+});
 #endregion
 
 #region NHL
