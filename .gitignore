@@ -476,3 +476,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#My stuff
+obj/Debug/net7.0/*.*
+obj/Debug/net8.0/*.*
