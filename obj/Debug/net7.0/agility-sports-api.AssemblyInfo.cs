@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("agility-sports-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+09e0aabb2160ee286451a2bab4f08ea900826bef")]
 [assembly: System.Reflection.AssemblyProductAttribute("agility-sports-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("agility-sports-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

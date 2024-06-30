@@ -51,7 +51,7 @@ app.UseHttpsRedirection();
 
 #region Version
 var all = app.MapGroup("api");
-all.MapGet("version", () => "0.2.0");
+all.MapGet("version", () => "1.1.0");
 #endregion
 
 #region NFL
