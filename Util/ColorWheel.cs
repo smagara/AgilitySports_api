@@ -7,7 +7,7 @@ public class ColorWheel : IColorWheel
 
     public string Next()
     {
-        if (currentColor >= colorWheel.Count-1)
+        if (currentColor >= colorWheel.Count - 1)
             currentColor = 0;
         else
             currentColor += 1;
@@ -19,17 +19,21 @@ public class ColorWheel : IColorWheel
     {
         colorWheel = new List<string>
         {
-            "#1c9ea6",
-            "#31e3c4",
-            "#72a7a8",
-            "#ffa700",
-            "#7fffd4",
-            "#af6f09",
-            "#4d7071",
-            "#722f37",
-            "#f4a460",
-            "#ab6819",
-            "#c7c10c"
+            "#3f76bf",  // Blue Crayola
+            "#4d7071",  // Slate Blue
+            "#003c8e",  // Dark Blue
+            "#5691af",  // light blue
+            "#4292ff",  // Blue (Pantone)
+            "#8c9dad",  // Cadet Blue
+            "#b7c0cc",  // Blue Grey            
+            "#3B82F",   // blue
+            "#99c5b5",  // Green Blue Crayola
+            "#1e7dff",  // Dodger Blue
+            "#d7dfe6",  // Light Steel Blue
+            "#6d8891",  // Steel Blue
+            "#23426b",  // Dark Blue Grey
+            "#eaeff5",  // Light Blue Grey
+            "#437ab7",  // sea blue
         };
     }
 }
