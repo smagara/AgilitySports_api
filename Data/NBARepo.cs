@@ -15,6 +15,7 @@ public class NBARepo : BaseRepo, INBARepo
     {
         using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.GetAllAsync<NBARoster>();
         }
 
