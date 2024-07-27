@@ -5,45 +5,42 @@ using AgilitySportsAPI.Dtos;
 using Dapper;
 
 namespace AgilitySportsAPI.Data;
-public class NFLRepo : INFLRepo
+public class NFLRepo : BaseRepo, INFLRepo
 {
-    private readonly IConfiguration configuration;
-
-    public NFLRepo(IConfiguration configuration)
+    public NFLRepo(IConfiguration configuration) : base(configuration)
     {
-        this.configuration = configuration;
     }
 
     #region NFL
 
     public async Task<IEnumerable<NFLRoster>> GetAllNFLRoster()
     {
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        using (var connection = new SqlConnection(base.connectionString))
         {
             return await connection.GetAllAsync<NFLRoster>();
         }
-
     }
 
-        public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster(ILogger<NFLRepo> logger)
+    public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster(ILogger<NFLRepo> logger)
     {
         logger.LogInformation("Fetching NFL Roster");
-        
-                var sql = @"
-select 
-  Team
-, Name
-, Position
-, Number
-, Height
-, Weight
-, AgeExact
-, College
-from NFL.Roster
-order by 
-  1, 3, 2";
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+
+        var sql = @"
+                    select 
+                    Team
+                    , Name
+                    , Position
+                    , Number
+                    , Height
+                    , Weight
+                    , AgeExact
+                    , College
+                    from NFL.Roster
+                    order by 
+                    1, 3, 2";
+        using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.QueryAsync<NFLRosterDto>(sql);
         }
     }
