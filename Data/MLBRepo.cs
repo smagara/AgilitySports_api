@@ -8,14 +8,13 @@ using AgilitySportsAPI.Utilities;
 
 
 namespace AgilitySportsAPI.Data;
-public class MLBRepo : IMLBRepo
+public class MLBRepo : BaseRepo, IMLBRepo
 {
-    private readonly IConfiguration configuration;
     private readonly IColorWheel colors;
 
     public MLBRepo(ILogger<MLBRoster> logger, IConfiguration configuration, IColorWheel colors)
+        : base(configuration)
     {
-        this.configuration = configuration;
         this.colors = colors;
     }
 
@@ -23,8 +22,9 @@ public class MLBRepo : IMLBRepo
 
     public async Task<IEnumerable<MLBRoster>> GetAllMLBRoster()
     {
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.GetAllAsync<MLBRoster>();
         }
 
@@ -33,25 +33,26 @@ public class MLBRepo : IMLBRepo
     public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster(ILogger<MLBRoster> logger)
     {
         var sql = @"
-select 
-    PlayerId
-    ,FirstName
-    ,LastName
-    ,TeamName
-    ,Position
-    ,Bats
-    ,Throws
-    ,DateOfBirth
-    ,Height
-    ,Weight
-    ,League
-    ,BirthPlace
-    ,BirthCountry
-from MLB.Roster
-order by 
-  3,2";
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            select 
+                PlayerId
+                ,FirstName
+                ,LastName
+                ,TeamName
+                ,Position
+                ,Bats
+                ,Throws
+                ,DateOfBirth
+                ,Height
+                ,Weight
+                ,League
+                ,BirthPlace
+                ,BirthCountry
+            from MLB.Roster
+            order by 
+            3,2";
+        using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.QueryAsync<MLBRosterDto>(sql);
         }
     }
@@ -61,8 +62,9 @@ order by
     #region MLB.Attendance
     public async Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance()
     {
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.GetAllAsync<MLBAttendance>();
         }
     }
@@ -82,8 +84,9 @@ order by
         where (@yearId IS NULL OR yearId = @yearId)
         order by yearId, teamId";
 
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.QueryAsync<MLBAttendanceDto>(sql, new {yearId=year, year});
         }
     }
@@ -99,7 +102,7 @@ order by
 
         try
         {
-        using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+        using (var connection = new SqlConnection(base.connectionString))
         {
             var sql = @"
                 select 
@@ -114,6 +117,7 @@ order by
             mlbChart.datasets = new List<Dataset>();
 
             // run the query
+            await base.GenToken(connection);
             IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new {yearId=year, year});
 
             foreach(var team in chartData)
@@ -149,13 +153,14 @@ order by
         logger.LogInformation("Fetching MLB Decade Attendance for years {beginDecade} to {endDecade}", beginDecade, endDecade);
         try
         {
-            using (var connection = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
+            using (var connection = new SqlConnection(base.connectionString))
             {
                 var sql = @"
                 EXEC MLB.[attendanceReportSproc] @begin, @end;";
                 // begin to assemble our chart payload
                 mlbDecs.datasets = new List<Dataset>();
                 // run the query
+                await base.GenToken(connection);
                 IEnumerable<MLBAttendanceDto> chartData = await connection.QueryAsync<MLBAttendanceDto>(sql, new { begin = beginDecade, end = endDecade });
                 foreach (var dec in chartData)
                 {
