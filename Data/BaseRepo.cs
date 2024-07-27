@@ -25,7 +25,7 @@ public abstract class BaseRepo
         // fetch azure settings
         azureClientID = configuration.GetValue<string?>("AzureSettings:ClientID") ?? "";
         azureSQLAuthURL = configuration.GetValue<string?>("AzureSettings:AzureSQLAuthURL") ?? "";
-        azureOffline = configuration["AzureSettings:CloudOffline"] == "true";
+        azureOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
 
         // determine offline local or azure connection string
         connectionString = azureOffline ?
@@ -47,10 +47,22 @@ public abstract class BaseRepo
     {
         if (!azureOffline)
         {
-            var credential = new Azure.Identity.DefaultAzureCredential();
-            var token = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { azureSQLAuthURL }));
+            // Determine the Azure token to create.  Default if in dev environment for testing or managed identity for production.
+            Azure.Core.TokenCredential credential;
+
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                Console.WriteLine("Generating Default token for Azure connection");
+                credential = new Azure.Identity.DefaultAzureCredential();
+            }
+            else
+            {
+                Console.WriteLine("Generating Managed Identity token for Azure connection");
+                credential = new Azure.Identity.ManagedIdentityCredential(azureClientID);
+            }
+
+            var token = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext(new[] { azureSQLAuthURL }), CancellationToken.None);
             connection.AccessToken = token.Token;
-            Console.WriteLine("Token generated for Azure connection");
         }
         else
         {

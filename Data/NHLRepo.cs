@@ -17,6 +17,7 @@ public class NHLRepo : BaseRepo, INHLRepo
     {
         using (var connection = new SqlConnection(base.connectionString))
         {
+            await base.GenToken(connection);
             return await connection.GetAllAsync<NHLRoster>();
         }
 
