@@ -6,8 +6,10 @@ public interface INHLRepo
 {
     #region NHL
 
-    Task<IEnumerable<NHLRoster>> GetAllNHLRoster();
-    Task<IEnumerable<NHLRosterDto>> GetNHLRoster(ILogger<NHLRoster> logger);
+    Task<IEnumerable<NHLRosterDto>?> GetNHLRoster(ILogger<NHLRoster> logger, int? playerId);
+    Task<NHLRoster?> CreateNHLRoster(NHLRoster roster, ILogger<NHLRoster> logger);
+    Task<bool> UpdateNHLRoster(NHLRoster roster, ILogger<NHLRoster> logger);
+    Task<bool> DeleteNHLRoster(int playerId, ILogger<NHLRoster> logger);
 
     #endregion
 }

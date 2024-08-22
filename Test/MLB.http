@@ -14,3 +14,6 @@ get http://localhost:1106/api/mlb/attendance
 
 ### hydrate a PrimeNG chart with MLB Attendance
 get http://localhost:1106/api/mlb/chart?yearId=1984
+
+### hydrate a PrimeNG chart with MLB Attendance by decade
+get http://localhost:1106/api/mlb/decades?yearId=1980
