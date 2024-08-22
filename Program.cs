@@ -17,9 +17,9 @@ builder.Services.AddSwaggerGen();
 //builder.Logging.ClearProviders();
 ILoggingBuilder logB = builder.Logging.AddLog4Net(
     new Log4NetProviderOptions()
-        {
-            Log4NetConfigFileName = "log4net.config"
-        }
+    {
+        Log4NetConfigFileName = "log4net.config"
+    }
     );
 
 
@@ -101,12 +101,66 @@ MLB.MapGet("decades", async (ILogger<MLBAttendChartDTO> logger, short? beginDeca
 
 #region NHL
 var NHL = all.MapGroup("nhl");
-NHL.MapGet("roster/all", async (ILogger<NHLRoster> logger, INHLRepo repoNHL) => {
-    return Results.Ok(await repoNHL.GetAllNHLRoster());
+
+// Read
+NHL.MapGet("roster", async (ILogger<NHLRoster> logger, int? playerId, INHLRepo repo) =>
+{
+    var results = await repo.GetNHLRoster(logger, playerId);
+    if (results != null)
+    {
+        return Results.Ok(results);
+    }
+    else
+    {
+        return Results.Problem("Error fetching NHL Roster, ask your admin to check the logs.");
+    }   
 });
 
-NHL.MapGet("roster", async (ILogger<NHLRoster> logger, INHLRepo repo) => {
-    return Results.Ok(await repo.GetNHLRoster(logger));
+// Create
+NHL.MapPost("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, NHLRoster roster) =>
+{
+    NHLRoster? newPlayer = await repo.CreateNHLRoster(roster, logger);
+
+    if (newPlayer != null)
+    {
+        return Results.Ok("Added to NHL Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error adding to NHL Roster, check the logs.");
+    }
+});
+
+// Update
+NHL.MapPut("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, NHLRoster roster) =>
+{
+    bool ret = await repo.UpdateNHLRoster(roster, logger);
+
+    if (ret == true)
+    {
+        return Results.Ok("Updated NHL Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error updating the NHL Roster, check the logs.");
+    }
+});
+
+// Delete
+NHL.MapDelete("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, int playerId) =>
+{
+
+    bool ret = await repo.DeleteNHLRoster(playerId, logger);
+
+    if (ret == true)
+    {
+        return Results.Ok("Deleted from NHL Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error deleting from NHL Roster, check the logs.");
+
+    }
 });
 #endregion
 

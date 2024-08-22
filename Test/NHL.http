@@ -1,7 +1,46 @@
 @url = http://localhost:1106/api/
 
-### get all roster
-get {{url}}nhl/roster/all
-
 ### list players
 get http://localhost:1106/api/nhl/roster
+
+## get player
+### list players
+get http://localhost:1106/api/nhl/roster/?playerID=518
+
+### Delete NHL player
+DELETE http://localhost:1106/api/nhl/roster?playerId=518
+
+### Create new NHL player
+POST http://localhost:1106/api/nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 999,
+  "name": "AB Grier",
+  "team": "Bruins",
+  "number": "13",
+  "position": "LF",
+  "handed": "L",
+  "age": 33,
+  "drafted": 0,
+  "birthPlace": "Anywhere",
+  "birthCountry": "Canada"
+}
+
+
+### Update NHL player
+PUT http://localhost:1106/api/nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 9,
+  "name": "JD Grier",
+  "team": "Bruins",
+  "number": "13",
+  "position": "LF",
+  "handed": "L",
+  "age": 33,
+  "drafted": 2011,
+  "birthPlace": "nowhere",
+  "birthCountry": "noplace"
+}
