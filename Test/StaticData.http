@@ -1,0 +1,4 @@
+@url = http://localhost:1106/api/staticdata/
+
+### list of NHL position codes
+get {{@url}}positions?sport=NHL

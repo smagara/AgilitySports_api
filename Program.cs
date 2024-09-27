@@ -29,6 +29,7 @@ builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
 builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
+builder.Services.AddScoped<IStaticData, StaticData>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
@@ -172,6 +173,23 @@ NBA.MapGet("roster/all", async (INBARepo repoNBA) => {
 NBA.MapGet("roster", async (ILogger<NBARoster> logger, INBARepo repo) => {
     return Results.Ok(await repo.GetNBARoster(logger));
 });
+#endregion
+
+#region StaticData
+var staticData = all.MapGroup("staticdata");
+staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
+{
+    var results = await repoPosition.GetPositionCodes(logger, sport);
+    if (results != null)
+    {
+        return Results.Ok(results);
+    }
+    else
+    {
+        return Results.Problem("Error fetching sport Positions for " + sport + ", ask your admin to check the logs.");
+    } 
+});
+
 #endregion
 
 app.Run();
