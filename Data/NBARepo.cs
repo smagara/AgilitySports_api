@@ -78,6 +78,8 @@ public class NBARepo : BaseRepo, INBARepo
         {
             using (var connection = new SqlConnection(base.connectionString))
             {
+                await base.GenToken(connection);
+
                 // Retrieve the existing record
                 var existingRoster = await connection.GetAsync<NBARoster>(roster.playerID);
                 if (existingRoster == null)
@@ -101,7 +103,7 @@ public class NBARepo : BaseRepo, INBARepo
                         Console.WriteLine("NBA Not updating Null " + property.Name);
                     }
                 }
-                await base.GenToken(connection);
+
                 await connection.UpdateAsync(existingRoster);
                 return true;
             }

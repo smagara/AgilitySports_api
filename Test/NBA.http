@@ -33,6 +33,5 @@ Content-Type: application/json
 {
   "playerID": 280,
   "FirstName": "Maxi",
-  "LastName": "Mouse",
-  "College": "Brown"
+  "LastName": "Mouse"
 }
