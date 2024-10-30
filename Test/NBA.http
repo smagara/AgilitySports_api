@@ -32,13 +32,7 @@ Content-Type: application/json
 
 {
   "playerID": 280,
-  "FirstName": "Minnie",
+  "FirstName": "Maxi",
   "LastName": "Mouse",
-  "Team": "76ers",
-  "Number": "66",
-  "Position": "C",
-  "Height": "6' 2\"",
-  "Weight": "233",
-  "DateOfBirth": "1991-04-26T00:00:00",
   "College": "Brown"
 }

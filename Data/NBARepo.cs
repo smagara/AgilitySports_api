@@ -78,8 +78,31 @@ public class NBARepo : BaseRepo, INBARepo
         {
             using (var connection = new SqlConnection(base.connectionString))
             {
+                // Retrieve the existing record
+                var existingRoster = await connection.GetAsync<NBARoster>(roster.playerID);
+                if (existingRoster == null)
+                {
+                    logger.LogWarning($"NBA Roster with PlayerID {roster.playerID} not found.");
+                    return false;
+                }
+
+                // Use reflection to update properties that are not null (Sparse update)
+                var properties = typeof(NBARoster).GetProperties();
+                foreach (var property in properties)
+                {
+                    var newValue = property.GetValue(roster);
+                    if (newValue != null)
+                    {
+                        property.SetValue(existingRoster, newValue);
+                        Console.WriteLine("NBA Updating " + property.Name);
+                    }
+                    else
+                    {
+                        Console.WriteLine("NBA Not updating Null " + property.Name);
+                    }
+                }
                 await base.GenToken(connection);
-                await connection.UpdateAsync(roster);
+                await connection.UpdateAsync(existingRoster);
                 return true;
             }
         }
