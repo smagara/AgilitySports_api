@@ -1,7 +1,44 @@
 @url = http://localhost:1106/api/
 
-### get all roster
-get {{url}}nba/roster/all
-
 ### list players
-get http://localhost:1106/api/nba/roster
+get{{url}}nba/roster
+
+### get player
+get {{url}}NBA/roster/?playerID=999
+
+### Delete player
+DELETE {{url}}NBA/roster?playerId=999
+
+### Create new player
+POST {{url}}NBA/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
+
+
+### Update NBA player
+PUT {{url}}NBA/roster
+Content-Type: application/json
+
+{
+  "playerID": 280,
+  "FirstName": "Minnie",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "66",
+  "Position": "C",
+  "Height": "6' 2\"",
+  "Weight": "233",
+  "DateOfBirth": "1991-04-26T00:00:00",
+  "College": "Brown"
+}
