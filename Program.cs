@@ -167,11 +167,66 @@ NHL.MapDelete("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, int pla
 
 #region NBA
 var NBA = all.MapGroup("nba");
-NBA.MapGet("roster/all", async (INBARepo repoNBA) => {
-    return Results.Ok(await repoNBA.GetAllNBARoster());
+
+// Read
+NBA.MapGet("roster", async (ILogger<NBARoster> logger, int? playerId, INBARepo repo) =>
+{
+    var results = await repo.GetNBARoster(logger, playerId);
+    if (results != null)
+    {
+        return Results.Ok(results);
+    }
+    else
+    {
+        return Results.Problem("Error fetching NBA Roster, ask your admin to check the logs.");
+    }   
 });
-NBA.MapGet("roster", async (ILogger<NBARoster> logger, INBARepo repo) => {
-    return Results.Ok(await repo.GetNBARoster(logger));
+
+// Create
+NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, NBARoster roster) =>
+{
+    NBARoster? newPlayer = await repo.CreateNBARoster(roster, logger);
+
+    if (newPlayer != null)
+    {
+        return Results.Ok("Added to NBA Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error adding to NBA Roster, check the logs.");
+    }
+});
+
+// Update
+NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, NBARoster roster) =>
+{
+    bool ret = await repo.UpdateNBARoster(roster, logger);
+
+    if (ret == true)
+    {
+        return Results.Ok("Updated NBA Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error updating the NBA Roster, check the logs.");
+    }
+});
+
+// Delete
+NBA.MapDelete("roster", async (ILogger<NBARoster> logger, INBARepo repo, int playerId) =>
+{
+
+    bool ret = await repo.DeleteNBARoster(playerId, logger);
+
+    if (ret == true)
+    {
+        return Results.Ok("Deleted from NBA Roster.");
+    }
+    else
+    {
+        return Results.Problem("Error deleting from NBA Roster, check the logs.");
+
+    }
 });
 #endregion
 

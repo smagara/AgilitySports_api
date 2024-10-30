@@ -3,7 +3,7 @@ namespace AgilitySportsAPI.Dtos;
 public class NBARosterDto
 {
 
-    public int? playerID { get; set; }
+    public int playerID { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Team { get; set; }
