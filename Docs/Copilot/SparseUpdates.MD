@@ -1,4 +1,4 @@
-## Logging the conversation with Copilot about SQL errors during sparse updates
+# Logging the conversation with Copilot about SQL errors during sparse updates
 
 1. Why did I get an error on a sparse update JSON?  
 

@@ -1,7 +1,4 @@
 @url = http://localhost:1106/api/
 
 ### get all roster
-get {{url}}nfl/roster/all
-
-### list players
-get http://localhost:1106/api/nfl/roster
+get {{url}}nfl/roster
