@@ -1,10 +1,10 @@
 @url = http://localhost:1106/api/
 
 ### list players
-get{{url}}nba/roster
+get {{url}}nba/roster
 
 ### get player
-get {{url}}NBA/roster/?playerID=999
+get {{url}}NBA/roster/?playerID=13
 
 ### Delete player
 DELETE {{url}}NBA/roster?playerId=999
