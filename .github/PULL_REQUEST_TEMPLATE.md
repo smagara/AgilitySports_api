@@ -2,7 +2,7 @@
 
 ## Description
 
-Please include a summary of the changes and the related issue. Please also include relevant motivation and context.
+Please include a summary of the changes and the related issue. Please also include relevant motivation and context.  Delete any non-relevant sections or items.
 
 ## Dependencies
 - First dependency
@@ -12,7 +12,7 @@ Fixes or Implements # (issue)
 
 ## Type of change
 
-Please delete options that are not relevant.
+Please check relevant options
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
@@ -28,7 +28,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 
 ## Checklist:
 
-- [ ] My code follows the style guidelines of this project
+- [ ] My code follows the style guidelines of this project, formatting and lint-ing
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation, if applicable
