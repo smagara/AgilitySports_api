@@ -7,8 +7,7 @@ public interface INFLRepo
 {
     #region NFL
 
-    Task<IEnumerable<NFLRoster>> GetAllNFLRoster();
-    Task<IEnumerable<NFLRosterDto>> GetNFLRoster(ILogger<NFLRepo> logger);
+    Task<IEnumerable<NFLRosterDto>?> GetNFLRoster(ILogger<NFLRoster> logger, int? playerId);
 
     #endregion
 }

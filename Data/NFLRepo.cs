@@ -13,20 +13,12 @@ public class NFLRepo : BaseRepo, INFLRepo
 
     #region NFL
 
-    public async Task<IEnumerable<NFLRoster>> GetAllNFLRoster()
-    {
-        using (var connection = new SqlConnection(base.connectionString))
-        {
-            await base.GenToken(connection);
-            return await connection.GetAllAsync<NFLRoster>();
-        }
-    }
-
-    public async Task<IEnumerable<NFLRosterDto>> GetNFLRoster(ILogger<NFLRepo> logger)
+    public async Task<IEnumerable<NFLRosterDto>?> GetNFLRoster(ILogger<NFLRoster> logger, int? playerId)
     {
         logger.LogInformation("Fetching NFL Roster");
-
-        var sql = @"
+        try
+        {
+            var sql = @"
                     select 
                     Team
                     , Name
@@ -36,13 +28,23 @@ public class NFLRepo : BaseRepo, INFLRepo
                     , Weight
                     , AgeExact
                     , College
+                    , playerId
                     from NFL.Roster
+                    where 
+                        (@playerId is null or playerId = @playerId)
                     order by 
                     1, 3, 2";
-        using (var connection = new SqlConnection(base.connectionString))
+            using (var connection = new SqlConnection(base.connectionString))
+            {
+                await base.GenToken(connection);
+                return await connection.QueryAsync<NFLRosterDto>(sql, new { playerId });
+            }
+
+        }
+        catch (Exception ex)
         {
-            await base.GenToken(connection);
-            return await connection.QueryAsync<NFLRosterDto>(sql);
+            logger.LogError("Error fetching NFL roster: " + ex.Message);
+            return null;
         }
     }
 
