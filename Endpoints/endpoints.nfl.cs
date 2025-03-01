@@ -11,12 +11,19 @@ public static class NflEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapNflEndpoints(this IEndpointRouteBuilder routes)
     {
-
         var NFL = routes.MapGroup("api/nfl");
-
-        NFL.MapGet("roster", async (INFLRepo repo, ILogger<NFLRepo> logger) =>
+        
+        NFL.MapGet("roster", async (ILogger<NFLRoster> logger, int? playerId, INFLRepo repo) =>
         {
-            return Results.Ok(await repo.GetNFLRoster(logger));
+            var results = await repo.GetNFLRoster(logger, playerId);
+            if (results != null)
+            {
+                return Results.Ok(results);
+            }
+            else
+            {
+                return Results.Problem("Error fetching NFL Roster, ask your admin to check the logs.");
+            }
         });
     }
 }
