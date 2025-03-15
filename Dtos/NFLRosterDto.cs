@@ -2,6 +2,7 @@ namespace AgilitySportsAPI.Dtos;
 
 public class NFLRosterDto
 {
+    public int playerID { get; set; }
     public string team { get; set; } = null!;
     public string name { get; set; } = null!;
     public string position { get; set; } = null!;

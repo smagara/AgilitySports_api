@@ -48,5 +48,60 @@ public class NFLRepo : BaseRepo, INFLRepo
         }
     }
 
+    public async Task<NFLRoster?> Create(NFLRoster player, ILogger<NFLRoster> logger)
+    {
+        logger.LogInformation("Creating NFL Roster");
+        try
+        {
+            using (var connection = new SqlConnection(base.connectionString))
+            {
+                await base.GenToken(connection);
+                await connection.InsertAsync(player);
+                return player;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error creating NFL Roster: " + ex.Message);
+            return null;
+        }
+    }
+
+    public async Task<bool> Update(NFLRoster player, ILogger<NFLRoster> logger)
+    {
+        logger.LogInformation("Updating NFL Roster");
+        try
+        {
+            using (var connection = new SqlConnection(base.connectionString))
+            {
+                await base.GenToken(connection);
+                return await connection.UpdateAsync(player);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error updating NFL Roster: " + ex.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> Delete(int playerId, ILogger<NFLRoster> logger)
+    {
+        logger.LogInformation("Deleting NFL Roster");
+        try
+        {
+            using (var connection = new SqlConnection(base.connectionString))
+            {
+                await base.GenToken(connection);
+                return await connection.DeleteAsync(new NFLRoster { PlayerId = playerId });
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error deleting NFL Roster: " + ex.Message);
+            return false;
+        }
+    }
+
     #endregion
 }

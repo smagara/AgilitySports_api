@@ -2,3 +2,67 @@
 
 ### get all roster
 get {{url}}nfl/roster
+
+### get player by PlayerID
+get {{url}}nfl/roster/?playerID=24904
+
+### create new player
+post {{url}}nfl/roster
+Content-Type: application/json
+
+{
+    "PlayerId": 0,
+    "Name": "John Doe",
+    "FirstName": "John",
+    "LastName": "Doe",
+    "Team": "NYG",
+    "Position": "QB",
+    "FantasyPosition": "QB",
+    "PositionCategory": "OFF",
+    "Height": "6'2\"",
+    "Weight": 220,
+    "Number": 12,
+    "CurrentStatus": "Healthy",
+    "CurrentStatusColor": "green",
+    "BirthDateShortString": "1995-05-15T00:00:00",
+    "Age": "29",
+    "AgeExact": 29.75,
+    "College": "Example University",
+    "CollegeDraftRound": "1",
+    "CollegeDraftPick": "10",
+    "ExperienceDigit": "5",
+    "PlayerUrlString": "http://example.com/player/johndoe",
+    "TeamName": "Example Team",
+    "TeamUrlString": "http://example.com/team/exampleteam",
+    "PhotoUrl": "http://example.com/player/johndoe/photo.jpg",
+    "PreferredHostedHeadshotUrl": "http://example.com/player/johndoe/headshot.jpg",
+    "LowResPreferredHostedHeadshotUrl": "http://example.com/player/johndoe/headshot_lowres.jpg",
+    "IsAvailableToPlay": true,
+    "Status": "Healthy",
+    "InjuryStatus": "None",
+    "InjuryBodyPart": "None",
+    "ShortName": "J. Doe",
+    "TeamDetails": "Example Team Details",
+    "CSName": "John Doe"
+}
+
+### update player by PlayerID
+put {{url}}nfl/roster/?playerID=3
+Content-Type: application/json
+
+{
+    "PlayerId": 24905,
+    "FirstName": "New First Name",
+    "LastName": "New Last Name",
+    "Name": "Dummy Name",
+    "Team": "New Team",
+    "Position": "QB",
+    "FantasyPosition": "QB",
+    "PositionCategory": "OFF",
+    "Height": "6'1\"",
+    "Weight": 222,
+    "Number": 13
+}
+
+### delete player by PlayerID
+delete {{url}}nfl/roster/?playerID=24905
