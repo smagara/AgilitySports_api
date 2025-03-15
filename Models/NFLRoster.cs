@@ -6,7 +6,7 @@ namespace AgilitySportsAPI.Models;
 public record NFLRoster
 {
     [Key]
-    public int? PlayerId { get; set; }
+    public int PlayerId { get; set; }
     public string? Name { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
