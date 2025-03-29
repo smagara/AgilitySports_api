@@ -7,7 +7,6 @@ public record NFLRoster
 {
     [Key]
     public int PlayerId { get; set; }
-    public string? Name { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Team { get; set; }
@@ -20,7 +19,7 @@ public record NFLRoster
     public string? CurrentStatus { get; set; }
     public string? CurrentStatusColor { get; set; }
     public DateTime? BirthDateShortString { get; set; }
-    public string? Age { get; set; }
+    public int? Age { get; set; }
     public double? AgeExact { get; set; }
     public string? College { get; set; }
     public string? CollegeDraftRound { get; set; }

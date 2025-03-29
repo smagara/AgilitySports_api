@@ -21,12 +21,13 @@ public class NFLRepo : BaseRepo, INFLRepo
             var sql = @"
                     select 
                     Team
-                    , Name
+                    , firstName
+                    , lastName
                     , Position
                     , Number
                     , Height
                     , Weight
-                    , AgeExact
+                    , Age
                     , College
                     , playerId
                     from NFL.Roster
