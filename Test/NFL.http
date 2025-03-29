@@ -12,7 +12,6 @@ Content-Type: application/json
 
 {
     "PlayerId": 0,
-    "Name": "John Doe",
     "FirstName": "John",
     "LastName": "Doe",
     "Team": "NYG",

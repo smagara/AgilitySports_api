@@ -21,7 +21,8 @@ public class NFLRepo : BaseRepo, INFLRepo
             var sql = @"
                     select 
                     Team
-                    , Name
+                    , firstName
+                    , lastName
                     , Position
                     , Number
                     , Height
