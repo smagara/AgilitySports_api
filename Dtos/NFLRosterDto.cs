@@ -10,6 +10,6 @@ public class NFLRosterDto
     public string number { get; set; } = null!;
     public string height { get; set; } = null!;
     public string weight { get; set; } = null!;
-    public double ageExact { get; set; }
+    public int age { get; set; }
     public string college { get; set; } = null!;
 }

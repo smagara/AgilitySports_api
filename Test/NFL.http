@@ -25,7 +25,6 @@ Content-Type: application/json
     "CurrentStatusColor": "green",
     "BirthDateShortString": "1995-05-15T00:00:00",
     "Age": "29",
-    "AgeExact": 29.75,
     "College": "Example University",
     "CollegeDraftRound": "1",
     "CollegeDraftPick": "10",
@@ -60,7 +59,8 @@ Content-Type: application/json
     "PositionCategory": "OFF",
     "Height": "6'1\"",
     "Weight": 222,
-    "Number": 13
+    "Number": 13,
+    "age": 33
 }
 
 ### delete player by PlayerID

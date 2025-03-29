@@ -27,7 +27,7 @@ public class NFLRepo : BaseRepo, INFLRepo
                     , Number
                     , Height
                     , Weight
-                    , AgeExact
+                    , Age
                     , College
                     , playerId
                     from NFL.Roster

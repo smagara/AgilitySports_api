@@ -19,7 +19,7 @@ public record NFLRoster
     public string? CurrentStatus { get; set; }
     public string? CurrentStatusColor { get; set; }
     public DateTime? BirthDateShortString { get; set; }
-    public string? Age { get; set; }
+    public int? Age { get; set; }
     public double? AgeExact { get; set; }
     public string? College { get; set; }
     public string? CollegeDraftRound { get; set; }
