@@ -99,7 +99,7 @@ public class NFLRepo : BaseRepo, INFLRepo
         }
         catch (Exception ex)
         {
-            //logger.LogError("Error deleting NFL Roster: " + ex.Message);
+            logger.LogError("Error deleting NFL Roster: " + ex.Message);
             return false;
         }
     }

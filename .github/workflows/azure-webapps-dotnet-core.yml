@@ -39,33 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check for empty or unlogged C# catch blocks
-        run: |
-          # Find empty catch blocks (with or without parentheses)
-          if grep -Przona --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{\s*\}' .; then
-            echo "ERROR: Empty catch block(s) found."
-            exit 1
-          fi
+      - name: Install dotnet-script
+        run: dotnet tool install -g dotnet-script
 
-          # Find catch blocks (with or without parentheses) that do not contain throw or LogError
-          grep -Pzrnoa --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | \
-          awk -F: '
-            {
-              file=$1; line=$2;
-              code="";
-              for(i=3;i<=NF;++i) {
-                code = code (i==3 ? "" : ":") $i
-              }
-              if (code !~ /throw/ && code !~ /LogError/) {
-                print "WARNING: Unlogged error found in catch block(s):";
-                print "File: " file;
-                print "Line: " line;
-                print "Code:";
-                print code;
-                exit 1
-              }
-            }
-          '
+      - name: Run Catch Block Analysis
+        run: dotnet-script scripts/CheckCatchBlocks.csx
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
