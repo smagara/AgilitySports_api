@@ -52,9 +52,8 @@ jobs:
             if [[ "$match" != *throw* && "$match" != *LogError* ]]; then
               echo "WARNING: Unlogged error found in catch block(s):"
               echo "File: $file"
-              echo "Line: $line"
               echo "Code:"
-              echo "$match"
+              echo "  $match"
               exit 1
             fi
           done
