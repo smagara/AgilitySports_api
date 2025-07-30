@@ -5,7 +5,7 @@ namespace AgilitySportsAPI.Models;
 [Table("dbo.PositionCodes")]
 public record PositionCodes
 {
-    [Key] string Sport { get; set; }
-    public string PositionCode { get; set; }
-    public string PositionDesc { get; set; }
+    [Key] public required string Sport { get; set; }
+    public required string PositionCode { get; set; }
+    public required string PositionDesc { get; set; }
 }
