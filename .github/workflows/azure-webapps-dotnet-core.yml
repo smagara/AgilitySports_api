@@ -47,13 +47,13 @@ jobs:
             exit 1
           fi
 
-          # Find catch blocks (with or without parentheses) that do not contain throw or LogError
-          grep -Pzrnoa --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | while IFS=: read -r file line match; do
-            if [[ "$match" != *throw* && "$match" != *LogError* ]]; then
+          # Use a unique delimiter to capture the whole match
+          grep -Pzrnoa --include=*.cs --output-delimiter='|||' 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | while IFS='|||' read -r file line match; do
+            if [[ -n "$match" && "$match" != *throw* && "$match" != *LogError* ]]; then
               echo "WARNING: Unlogged error found in catch block(s):"
               echo "File: $file"
               echo "Code:"
-              echo "  $match"
+              echo "$match"
               exit 1
             fi
           done
