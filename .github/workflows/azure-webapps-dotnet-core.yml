@@ -50,18 +50,18 @@ jobs:
           # Find catch blocks (with or without parentheses) that do not contain throw or LogError
           grep -Pzrnoa --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | \
           awk -F: '
-            BEGIN { OFS=":" }
             {
               file=$1; line=$2;
-              # Reconstruct the match (may contain colons)
-              match=$0;
-              sub(/^[^:]+:[^:]+:/, "", match);
-              if (match !~ /throw/ && match !~ /LogError/) {
+              code="";
+              for(i=3;i<=NF;++i) {
+                code = code (i==3 ? "" : ":") $i
+              }
+              if (code !~ /throw/ && code !~ /LogError/) {
                 print "WARNING: Unlogged error found in catch block(s):";
                 print "File: " file;
                 print "Line: " line;
                 print "Code:";
-                print match;
+                print code;
                 exit 1
               }
             }
