@@ -11,25 +11,18 @@ public static class StaticDataEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapStaticDataEndpoints(this IEndpointRouteBuilder routes)
     {
-        try
+        var staticData = routes.MapGroup("api/staticdata");
+        staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
         {
-            var staticData = routes.MapGroup("api/staticdata");
-            staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
+            var results = await repoPosition.GetPositionCodes(logger, sport);
+            if (results != null)
             {
-                var results = await repoPosition.GetPositionCodes(logger, sport);
-                if (results != null)
-                {
-                    return Results.Ok(results);
-                }
-                else
-                {
-                    return Results.Problem("Error fetching sport Positions for " + sport + ", ask your admin to check the logs.");
-                }
-            });
-        }
-        catch
-        {
-            // this exception doesn't log or rethrow.  The GitHub pipeline should fail if this happens.
-        }
+                return Results.Ok(results);
+            }
+            else
+            {
+                return Results.Problem("Error fetching sport Positions for " + sport + ", ask your admin to check the logs.");
+            }
+        });
     }
 }
