@@ -48,18 +48,16 @@ jobs:
           fi
 
           # Find catch blocks (with or without parentheses) that do not contain throw or LogError
-          if grep -Pzrna --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | awk '
-            BEGIN { RS=""; FS="\0" }
-            {
-              if ($0 !~ /throw/ && $0 !~ /LogError/) {
-                print "WARNING: Unlogged error found in catch block(s):"
-                print $0
-                exit 1
-              }
-            }
-          '; then
-            exit 1
-          fi
+          grep -Pzrnoa --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | while IFS=: read -r file line match; do
+            if [[ "$match" != *throw* && "$match" != *LogError* ]]; then
+              echo "WARNING: Unlogged error found in catch block(s):"
+              echo "File: $file"
+              echo "Line: $line"
+              echo "Code:"
+              echo "$match"
+              exit 1
+            fi
+          done
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
@@ -106,5 +104,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
