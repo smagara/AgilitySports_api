@@ -47,16 +47,25 @@ jobs:
             exit 1
           fi
 
-          # Use a unique delimiter to capture the whole match
-          grep -Pzrnoa --include=*.cs --output-delimiter='|||' 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | while IFS='|||' read -r file line match; do
-            if [[ -n "$match" && "$match" != *throw* && "$match" != *LogError* ]]; then
-              echo "WARNING: Unlogged error found in catch block(s):"
-              echo "File: $file"
-              echo "Code:"
-              echo "$match"
-              exit 1
-            fi
-          done
+          # Find catch blocks (with or without parentheses) that do not contain throw or LogError
+          grep -Pzrnoa --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?)\}' . | \
+          awk -F: '
+            BEGIN { OFS=":" }
+            {
+              file=$1; line=$2;
+              # Reconstruct the match (may contain colons)
+              match=$0;
+              sub(/^[^:]+:[^:]+:/, "", match);
+              if (match !~ /throw/ && match !~ /LogError/) {
+                print "WARNING: Unlogged error found in catch block(s):";
+                print "File: " file;
+                print "Line: " line;
+                print "Code:";
+                print match;
+                exit 1
+              }
+            }
+          '
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
