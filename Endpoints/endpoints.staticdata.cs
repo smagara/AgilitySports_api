@@ -16,15 +16,6 @@ public static class StaticDataEndpoints
             var staticData = routes.MapGroup("api/staticdata");
             staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
             {
-                try
-                {
-                    int i = 1;
-                    i++;
-                }
-                catch (Exception ex)
-                {
-                    // flag this one as well
-                }
                 var results = await repoPosition.GetPositionCodes(logger, sport);
                 if (results != null)
                 {
