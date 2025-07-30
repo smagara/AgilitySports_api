@@ -41,15 +41,15 @@ jobs:
 
       - name: Check for empty C# catch blocks
         run: |
-          if grep -Przon 'catch\s*\([^\)]*\)\s*\{\s*\}' . --include=*.cs; then
+          if grep -Przon 'catch(\s*\([^\)]*\))?\s*\{\s*\}' . --include=*.cs; then
             echo "ERROR: Empty catch block(s) found."
             exit 1
           fi
 
       - name: Check for unlogged errors in C# catch blocks
         run: |
-          # Find catch blocks that do not contain LogError, throw, or rethrow
-          if grep -Pozrn --include=*.cs 'catch\s*\([^\)]*\)\s*\{([^{}]*?(\n|.)*?)(?<!throw;)(?<!LogError;)\s*\}' . | grep -v 'catch\s*(.*)\s*{\s*}' | grep -v 'throw;' | grep -v 'LogError;'; then
+          # Find catch blocks (with or without parentheses) that do not contain LogError, throw, or rethrow
+          if grep -Pozrn --include=*.cs 'catch(\s*\([^\)]*\))?\s*\{([^{}]*?(\n|.)*?)(?<!throw;)(?<!LogError;)\s*\}' . | grep -v 'catch\s*(.*)\s*{\s*}' | grep -v 'catch\s*{\s*}' | grep -v 'throw;' | grep -v 'LogError;'; then
             echo "WARNING: Unlogged error found in catch block(s)."
             exit 1
           fi
