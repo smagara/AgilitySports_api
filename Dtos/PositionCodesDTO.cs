@@ -2,7 +2,7 @@ namespace AgilitySportsAPI.Dtos;
 
 public record PositionCodesDTO
 {
-    string Sport { get; set; }
-    public string PositionCode { get; set; }
-    public string PositionDesc { get; set; }
+    public required string Sport { get; set; }
+    public required string PositionCode { get; set; }
+    public required string PositionDesc { get; set; }
 }

@@ -1,4 +1,7 @@
-@url = http://localhost:1106/api/staticdata/
+@url = http://localhost:1106/api/staticdata
 
 ### list of NHL position codes
-get {{@url}}positions?sport=NHL
+GET {{url}}/positions?sport=NHL
+
+### list of NBA position codes
+GET {{url}}/positions?sport=NBA

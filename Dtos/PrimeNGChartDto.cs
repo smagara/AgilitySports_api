@@ -5,15 +5,15 @@ namespace AgilitySportsAPI.Dtos;
 
     public class Dataset
     {
-        public string label { get; set; }
+        public string? label { get; set; }
         public string? backgroundColor { get; set; }
         public string? borderColor { get; set; }
         public string? borderWidth { get; set; }
-        public List<string> data { get; set; }
+        public List<string>? data { get; set; }
     }
 
     public class MLBAttendChartDTO
     {
-        public List<string> labels { get; set; }
-        public List<Dataset> datasets { get; set; }
+        public List<string> labels { get; set; } = new List<string>();
+        public List<Dataset> datasets { get; set; } = new List<Dataset>();
     }
