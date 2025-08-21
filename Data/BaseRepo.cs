@@ -1,5 +1,6 @@
 using System.Configuration;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 
 namespace AgilitySportsAPI.Data;
 
@@ -13,6 +14,8 @@ public abstract class BaseRepo
     protected string azureSQLAuthURL = "";
     protected bool azureOffline;  // set true in appsettings for local db testing
     protected string connectionString = "";
+    protected bool useSqlite = false;
+    protected string sqliteConnectionString = "";
 
     public BaseRepo(IConfiguration configuration)
     {
@@ -28,9 +31,26 @@ public abstract class BaseRepo
         azureOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
 
         // determine offline local or azure connection string
-        connectionString = azureOffline ?
-            (configuration.GetConnectionString("LocalConnection") ?? "") :
-            (configuration.GetConnectionString("AzureConnection") ?? "");
+        if (azureOffline)
+        {
+            var useSqliteFlag = configuration.GetValue<bool>("AzureSettings:UseSqlite");
+            if (useSqliteFlag)
+            {
+                sqliteConnectionString = configuration.GetConnectionString("SqliteConnection") ?? "Data Source=AgilitySports.db;Cache=Shared;Mode=ReadWriteCreate;";
+                connectionString = sqliteConnectionString;
+                useSqlite = true;
+            }
+            else
+            {
+                connectionString = configuration.GetConnectionString("LocalConnection") ?? "";
+                useSqlite = false;
+            }
+        }
+        else
+        {
+            connectionString = configuration.GetConnectionString("AzureConnection") ?? "";
+            useSqlite = false;
+        }
 
         if (azureClientID == "" || azureSQLAuthURL == "")
         {

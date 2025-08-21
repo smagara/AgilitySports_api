@@ -5,6 +5,7 @@ using AgilitySportsAPI.Dtos;
 using Dapper;
 //using System.Text.Json;
 using AgilitySportsAPI.Utilities;
+using Microsoft.Data.Sqlite;
 
 
 namespace AgilitySportsAPI.Data;
@@ -22,7 +23,10 @@ public class MLBRepo : BaseRepo, IMLBRepo
 
     public async Task<IEnumerable<MLBRoster>> GetAllMLBRoster()
     {
-        using (var connection = new SqlConnection(base.connectionString))
+        var connection = base.useSqlite
+            ? new SqliteConnection(base.connectionString)
+            : new SqlConnection(base.connectionString);
+        using (connection)
         {
             await base.GenToken(connection);
             return await connection.GetAllAsync<MLBRoster>();
