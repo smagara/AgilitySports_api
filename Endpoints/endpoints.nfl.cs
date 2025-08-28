@@ -2,6 +2,7 @@
 
 using AgilitySportsAPI.Data;
 using AgilitySportsAPI.Models;
+using AgilitySportsAPI.Services;
 
 public static class NflEndpoints
 {
@@ -28,8 +29,22 @@ public static class NflEndpoints
         });
 
         // Create
-        NFL.MapPost("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, NFLRoster roster) =>
+        NFL.MapPost("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, NFLRoster roster) =>
         {
+            // Validate for XSS patterns
+            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+            
+            if (!isValid)
+            {
+                logger.LogWarning("XSS attempt blocked in NFL roster creation. Violations: {Violations}", string.Join(", ", violations));
+                return Results.BadRequest(new 
+                { 
+                    Error = "XSS attempt detected", 
+                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                    Details = violations
+                });
+            }
+
             NFLRoster? newPlayer = await repo.Create(roster, logger);
 
             if (newPlayer != null)
@@ -43,8 +58,22 @@ public static class NflEndpoints
         });
 
         // Update
-        NFL.MapPut("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, NFLRoster roster) =>
+        NFL.MapPut("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, NFLRoster roster) =>
         {
+            // Validate for XSS patterns
+            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+            
+            if (!isValid)
+            {
+                logger.LogWarning("XSS attempt blocked in NFL roster update. Violations: {Violations}", string.Join(", ", violations));
+                return Results.BadRequest(new 
+                { 
+                    Error = "XSS attempt detected", 
+                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                    Details = violations
+                });
+            }
+
             bool ret = await repo.Update(roster, logger);
 
             if (ret == true)

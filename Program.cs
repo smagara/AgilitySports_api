@@ -2,6 +2,8 @@ using AgilitySportsAPI.Data;
 using AgilitySportsAPI.Dtos;
 using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Utilities;
+using AgilitySportsAPI.Services;
+using AgilitySportsAPI.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 var alwaysSwagger = true;
 
@@ -25,6 +27,7 @@ builder.Services.AddScoped<INBARepo, NBARepo>();
 builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 builder.Services.AddScoped<IStaticData, StaticData>();
+builder.Services.AddScoped<IXssValidationService, XssValidationService>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
@@ -34,6 +37,9 @@ app.UseCors(builder => builder // CORS remedy
 .AllowAnyMethod()
 .AllowAnyHeader()
 );
+
+// Add XSS logging middleware
+app.UseXssLogging();
 
 // Configure the HTTP request pipeline.
 if (alwaysSwagger || app.Environment.IsDevelopment())

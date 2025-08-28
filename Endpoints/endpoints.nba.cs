@@ -2,6 +2,7 @@
 
 using AgilitySportsAPI.Data;
 using AgilitySportsAPI.Models;
+using AgilitySportsAPI.Services;
 
 public static class NbaEndpoints
 {
@@ -26,8 +27,22 @@ public static class NbaEndpoints
             }
         });
 
-        NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, NBARoster roster) =>
+        NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, NBARoster roster) =>
         {
+            // Validate for XSS patterns
+            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+            
+            if (!isValid)
+            {
+                logger.LogWarning("XSS attempt blocked in NBA roster creation. Violations: {Violations}", string.Join(", ", violations));
+                return Results.BadRequest(new 
+                { 
+                    Error = "XSS attempt detected", 
+                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                    Details = violations
+                });
+            }
+
             NBARoster? newPlayer = await repo.CreateNBARoster(roster, logger);
 
             if (newPlayer != null)
@@ -40,8 +55,22 @@ public static class NbaEndpoints
             }
         });
 
-        NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, NBARoster roster) =>
+        NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, NBARoster roster) =>
         {
+            // Validate for XSS patterns
+            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+            
+            if (!isValid)
+            {
+                logger.LogWarning("XSS attempt blocked in NBA roster update. Violations: {Violations}", string.Join(", ", violations));
+                return Results.BadRequest(new 
+                { 
+                    Error = "XSS attempt detected", 
+                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                    Details = violations
+                });
+            }
+
             bool ret = await repo.UpdateNBARoster(roster, logger);
 
             if (ret == true)

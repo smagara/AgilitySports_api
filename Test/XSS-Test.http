@@ -1,0 +1,116 @@
+@url = http://localhost:1106/api/
+
+### Test XSS Protection - NBA Player Creation with Script Tag
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "<script>alert('XSS')</script>",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
+
+### Test XSS Protection - NBA Player Creation with Event Handler
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers<img src=x onerror=alert('XSS')>",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
+
+### Test XSS Protection - NBA Player Creation with JavaScript Protocol
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "javascript:alert('XSS')"
+}
+
+### Test XSS Protection - NFL Player Creation with Iframe
+POST {{url}}nfl/roster
+Content-Type: application/json
+
+{
+    "PlayerId": 0,
+    "FirstName": "<iframe src=javascript:alert('XSS')>",
+    "LastName": "Doe",
+    "Team": "NYG",
+    "Position": "QB",
+    "FantasyPosition": "QB",
+    "PositionCategory": "OFF",
+    "Height": "6'2\"",
+    "Weight": 220,
+    "Number": 12,
+    "CurrentStatus": "Healthy",
+    "CurrentStatusColor": "green",
+    "BirthDateShortString": "1995-05-15T00:00:00",
+    "Age": "29",
+    "College": "Example University"
+}
+
+### Test XSS Protection - NHL Player Creation with Encoded Script
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 999,
+  "name": "AB Grier",
+  "team": "Bruins",
+  "number": "13",
+  "position": "LF",
+  "handed": "L",
+  "age": 33,
+  "drafted": 0,
+  "birthPlace": "%3Cscript%3Ealert('XSS')%3C/script%3E",
+  "birthCountry": "Canada"
+}
+
+### Test XSS Protection - NBA Player Update with Multiple XSS Patterns
+PUT {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "playerID": 280,
+  "FirstName": "<script>alert('XSS1')</script>",
+  "LastName": "<img src=x onerror=alert('XSS2')>",
+  "Team": "javascript:alert('XSS3')",
+  "College": "<iframe src=javascript:alert('XSS4')>"
+}
+
+### Test Valid NBA Player Creation (Should Succeed)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
