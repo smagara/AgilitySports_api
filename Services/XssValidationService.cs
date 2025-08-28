@@ -17,6 +17,10 @@ public class XssValidationService : IXssValidationService
         // Common XSS patterns to detect
         _xssPatterns = new List<Regex>
         {
+            // Any < and > characters
+            new Regex(@"<", RegexOptions.IgnoreCase),
+            new Regex(@">", RegexOptions.IgnoreCase),
+
             // Script tags
             new Regex(@"<script[^>]*>.*?</script>", RegexOptions.IgnoreCase | RegexOptions.Singleline),
             new Regex(@"<script[^>]*>", RegexOptions.IgnoreCase),
@@ -29,25 +33,6 @@ public class XssValidationService : IXssValidationService
             
             // Data URLs
             new Regex(@"data:text/html", RegexOptions.IgnoreCase),
-            
-            // Common XSS vectors
-            new Regex(@"<iframe[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<object[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<embed[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<form[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<input[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<textarea[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<select[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<button[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<link[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<meta[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<style[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<title[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<base[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<bgsound[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<xmp[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<plaintext[^>]*>", RegexOptions.IgnoreCase),
-            new Regex(@"<listing[^>]*>", RegexOptions.IgnoreCase),
             
             // Encoded characters that could be used for XSS
             new Regex(@"&#x?[0-9a-f]+;", RegexOptions.IgnoreCase),
@@ -69,7 +54,11 @@ public class XssValidationService : IXssValidationService
             
             // Double encoded
             new Regex(@"%253Cscript", RegexOptions.IgnoreCase),
-            new Regex(@"%253cscript", RegexOptions.IgnoreCase)
+            new Regex(@"%253cscript", RegexOptions.IgnoreCase),
+
+            // Any encoded < and > characters
+            new Regex(@"&lt;", RegexOptions.IgnoreCase),
+            new Regex(@"&gt;", RegexOptions.IgnoreCase)
         };
     }
 
@@ -89,7 +78,7 @@ public class XssValidationService : IXssValidationService
                 {
                     if (ContainsXssPattern(value))
                     {
-                        var violation = $"XSS pattern detected in field '{property.Name}': {value}.  Nice try hoser!";
+                        var violation = $"XSS pattern detected in field '{property.Name}': {value}.  Update is rejected.";
                         violations.Add(violation);
                         logger.LogWarning("XSS Attempt Detected: {Violation}", violation);
                     }
@@ -108,3 +97,4 @@ public class XssValidationService : IXssValidationService
         return _xssPatterns.Any(pattern => pattern.IsMatch(input));
     }
 }
+

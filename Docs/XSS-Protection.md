@@ -8,11 +8,10 @@ This API has been enhanced with comprehensive XSS (Cross-Site Scripting) protect
 
 ### 1. XSS Pattern Detection
 The system detects various XSS attack patterns including:
-- Script tags (`<script>`, `<script src=...>`)
+- Any tags, including script or html, with <> characters, even if encoded
 - Event handlers (`onclick`, `onload`, `onerror`, etc.)
 - JavaScript protocol (`javascript:`)
 - Data URLs (`data:text/html`)
-- HTML elements commonly used in XSS (`<iframe>`, `<object>`, `<embed>`, etc.)
 - Encoded characters (`&#x3C;`, `%3C`, etc.)
 - CSS expressions (`expression()`)
 - VBScript protocol (`vbscript:`)
@@ -112,3 +111,4 @@ Potential improvements could include:
 - IP-based blocking for persistent attackers
 - Integration with security monitoring systems
 - Customizable validation rules per field type
+
