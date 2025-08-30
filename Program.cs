@@ -28,6 +28,8 @@ builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 builder.Services.AddScoped<IStaticData, StaticData>();
 builder.Services.AddScoped<IXssValidationService, XssValidationService>();
+builder.Services.AddScoped<IInputSanitizationService, InputSanitizationService>();
+builder.Services.AddScoped<IInputValidationService, InputValidationService>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();

@@ -1,0 +1,356 @@
+@url = http://localhost:1106/api/
+
+### Test Input Sanitization - NHL Player Creation with Various Input Types
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 999,
+  "name": "  John   Doe  ",
+  "team": "Bruins & Co.",
+  "number": "13",
+  "position": "LF",
+  "handed": "L",
+  "age": 33,
+  "drafted": 0,
+  "birthPlace": "Toronto, ON",
+  "birthCountry": "Canada"
+}
+
+### Test Input Sanitization - NBA Player with SQL Injection Attempt
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John",
+  "LastName": "Doe; DROP TABLE Players; --",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6'5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers University"
+}
+
+### Test Input Sanitization - NFL Player with Control Characters
+POST {{url}}nfl/roster
+Content-Type: application/json
+
+{
+    "PlayerId": 0,
+    "FirstName": "JohnU0000Doe",
+    "LastName": "Smith",
+    "Team": "NYG",
+    "Position": "QB",
+    "FantasyPosition": "QB",
+    "PositionCategory": "OFF",
+    "Height": "6'2\"",
+    "Weight": 220,
+    "Number": 12,
+    "CurrentStatus": "Healthy",
+    "CurrentStatusColor": "green",
+    "BirthDateShortString": "1995-05-15T00:00:00",
+    "Age": "29",
+    "College": "Example University"
+}
+
+### Test Input Sanitization - Strict Field Validation (Position)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C@#$%^&*()",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
+
+### Test Input Sanitization - Long String Truncation
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1000,
+  "name": "This is a very long name that should be truncated because it exceeds the maximum length allowed for strict field validation",
+  "team": "Bruins",
+  "number": "99",
+  "position": "C",
+  "handed": "R",
+  "age": 25,
+  "drafted": 1,
+  "birthPlace": "Boston",
+  "birthCountry": "USA"
+}
+
+### Test Input Sanitization - HTML Encoding
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John & Jane",
+  "LastName": "Smith < Doe",
+  "Team": "76ers > Lakers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6' 5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers \"University\""
+}
+
+### Test Structured Field Validation - Height (Valid)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "5'8\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}
+
+### Test Structured Field Validation - Height (Invalid Format)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Jane",
+  "LastName": "Smith",
+  "Team": "76ers",
+  "Number": "14",
+  "Position": "F",
+  "Height": "6 feet 2 inches",
+  "Weight": "185",
+  "DateOfBirth": "1990-03-15T00:00:00",
+  "College": "Duke"
+}
+
+### Test Structured Field Validation - Weight (Valid)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mike",
+  "LastName": "Johnson",
+  "Team": "76ers",
+  "Number": "15",
+  "Position": "G",
+  "Height": "6'0\"",
+  "Weight": "200",
+  "DateOfBirth": "1988-07-22T00:00:00",
+  "College": "Villanova"
+}
+
+### Test Structured Field Validation - Weight (Invalid Range)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Bob",
+  "LastName": "Wilson",
+  "Team": "76ers",
+  "Number": "16",
+  "Position": "C",
+  "Height": "7'0\"",
+  "Weight": "500",
+  "DateOfBirth": "1985-01-01T00:00:00",
+  "College": "Kentucky"
+}
+
+### Test Structured Field Validation - Position (Valid)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Alice",
+  "LastName": "Brown",
+  "Team": "76ers",
+  "Number": "17",
+  "Position": "PG",
+  "Height": "5'10\"",
+  "Weight": "160",
+  "DateOfBirth": "1993-06-10T00:00:00",
+  "College": "Stanford"
+}
+
+### Test Structured Field Validation - Position (Invalid)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Charlie",
+  "LastName": "Davis",
+  "Team": "76ers",
+  "Number": "18",
+  "Position": "XYZ",
+  "Height": "6'3\"",
+  "Weight": "190",
+  "DateOfBirth": "1991-12-25T00:00:00",
+  "College": "Michigan"
+}
+
+### Test Sport-Specific Position Validation - NBA Valid
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "David",
+  "LastName": "Wilson",
+  "Team": "Lakers",
+  "Number": "24",
+  "Position": "SG",
+  "Height": "6'6\"",
+  "Weight": "210",
+  "DateOfBirth": "1988-08-23T00:00:00",
+  "College": "Kentucky"
+}
+
+### Test Sport-Specific Position Validation - NFL Valid
+POST {{url}}nfl/roster
+Content-Type: application/json
+
+{
+  "PlayerId": 0,
+  "FirstName": "Tom",
+  "LastName": "Brady",
+  "Team": "TB",
+  "Position": "QB",
+  "FantasyPosition": "QB",
+  "PositionCategory": "OFF",
+  "Height": "6'4\"",
+  "Weight": 225,
+  "Number": 12,
+  "CurrentStatus": "Active",
+  "CurrentStatusColor": "green",
+  "BirthDateShortString": "1977-08-03T00:00:00",
+  "Age": "46",
+  "College": "Michigan"
+}
+
+### Test Sport-Specific Position Validation - NHL Valid
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1001,
+  "name": "Connor McDavid",
+  "team": "Oilers",
+  "number": "97",
+  "position": "C",
+  "handed": "L",
+  "age": 26,
+  "drafted": 1,
+  "birthPlace": "Richmond Hill",
+  "birthCountry": "Canada"
+}
+
+### Test Sport-Specific Position Validation - Cross-Sport Invalid
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John",
+  "LastName": "Football",
+  "Team": "76ers",
+  "Number": "99",
+  "Position": "QB",
+  "Height": "6'2\"",
+  "Weight": "220",
+  "DateOfBirth": "1990-01-01T00:00:00",
+  "College": "Alabama"
+}
+
+### Test Handed Field Validation - Valid Values
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1002,
+  "name": "Sidney Crosby",
+  "team": "Penguins",
+  "number": "87",
+  "position": "C",
+  "handed": "L",
+  "age": 36,
+  "drafted": 1,
+  "birthPlace": "Halifax",
+  "birthCountry": "Canada"
+}
+
+### Test Handed Field Validation - Another Valid Value
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1003,
+  "name": "Alexander Ovechkin",
+  "team": "Capitals",
+  "number": "8",
+  "position": "LW",
+  "handed": "R",
+  "age": 38,
+  "drafted": 1,
+  "birthPlace": "Moscow",
+  "birthCountry": "Russia"
+}
+
+### Test Handed Field Validation - Both Hands
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1004,
+  "name": "Ambidextrous Player",
+  "team": "Bruins",
+  "number": "99",
+  "position": "C",
+  "handed": "B",
+  "age": 25,
+  "drafted": 1,
+  "birthPlace": "Boston",
+  "birthCountry": "USA"
+}
+
+### Test Handed Field Validation - Invalid Value
+POST {{url}}nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 1005,
+  "name": "Invalid Player",
+  "team": "Bruins",
+  "number": "88",
+  "position": "D",
+  "handed": "X",
+  "age": 28,
+  "drafted": 1,
+  "birthPlace": "Toronto",
+  "birthCountry": "Canada"
+}
+
+### Test Valid Input (Should Pass All Sanitization)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "Mickey",
+  "LastName": "Mouse",
+  "Team": "76ers",
+  "Number": "13",
+  "Position": "C",
+  "Height": "6'5\"",
+  "Weight": "233",
+  "DateOfBirth": "1992-04-26T00:00:00",
+  "College": "Rutgers"
+}

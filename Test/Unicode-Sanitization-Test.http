@@ -1,0 +1,241 @@
+@url = http://localhost:1106/api/
+
+### Test Unicode Character Sanitization
+### This file tests the enhanced sanitization that handles problematic Unicode characters
+### For example, graphical punctuation from applications like Word, Excel.  
+### Curly quotes, em dashes, control characters, zero-width spaces, etc.
+### 
+### IMPORTANT: Use Unicode escape sequences for control characters in JSON:
+### - \x00 becomes \u0000 (null character)
+### - \x0B becomes \u000B (vertical tab)
+### - \x1F becomes \u001F (unit separator)
+### - \x80 becomes \u0080 (high control character)
+### - \n becomes \u000A (line feed)
+### - \t becomes \u0009 (tab)
+### - \r becomes \u000D (carriage return)
+
+### Test 1: Control Characters (Low and High)
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u0000Doe\u0080",
+  "LastName": "Smith\u000B\u001F",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 2: Unicode Formatting Characters
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u200BDoe",
+  "LastName": "Smith\u200C\u200D",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"
+}
+
+### Test 3: Curly Quotes and Smart Apostrophes
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "O'Connor",
+  "LastName": "D'Angelo",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "Age": "29",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"
+}
+
+### Test 4: Em Dashes and Ellipsis
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John—Doe",
+  "LastName": "Smith…",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 5: Mixed Problematic Characters
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u0000\u200BDoe",
+  "LastName": "O'Connor\u201D",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 6: Bidirectional Text Control
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u202ADoe",
+  "LastName": "Smith\u202C",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 7: Degree Symbols and Math Characters
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John°",
+  "LastName": "Smith×",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 8: Zero-Width Characters
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u200E\u200FDoe",
+  "LastName": "Smith\u2060",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 9: Soft Hyphens and Invisible Separators
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u00AD\u2063Doe",
+  "LastName": "Smith\u2064",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 10: Complex Mixed Case
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "O'Connor\u2018",
+  "LastName": "D'Angelo\u201D—Smith…",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"
+}
+
+### Test 11: SQL Injection Patterns
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John; DROP TABLE Users; --",
+  "LastName": "Smith' OR '1'='1",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 12: SQL Keywords in Names
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "SELECT",
+  "LastName": "INSERT INTO",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 13: SQL Injection with Unicode
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u200B; DROP TABLE Users; --",
+  "LastName": "O'Connor\u201D OR '1'='1",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 14: Newlines and Tabs in Text Fields
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u000ADoe",
+  "LastName": "Smith\u0009Johnson",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}
+
+### Test 15: Mixed Control Characters with Newlines
+POST {{url}}nba/roster
+Content-Type: application/json
+
+{
+  "FirstName": "John\u0000\u000ADoe\u0009",
+  "LastName": "Smith\u000D\u000AJohnson",
+  "Height": "6'2\"",
+  "Weight": "185",
+  "Position": "PG",
+  "Team": "Lakers",
+  "College": "Example University",
+  "DateOfBirth": "1995-05-15"  
+}

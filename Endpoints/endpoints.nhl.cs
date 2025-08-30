@@ -29,7 +29,7 @@ public static class NhlEndpoints
         });
 
         // Create
-        NHL.MapPost("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, NHLRoster roster) =>
+        NHL.MapPost("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -45,7 +45,24 @@ public static class NhlEndpoints
                 });
             }
 
-            NHLRoster? newPlayer = await repo.CreateNHLRoster(roster, logger);
+            // Validate structured fields (height, weight, age, position, handed, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NHL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            NHLRoster? newPlayer = await repo.CreateNHLRoster(sanitizedRoster, logger);
 
             if (newPlayer != null)
             {
@@ -58,7 +75,7 @@ public static class NhlEndpoints
         });
 
         // Update
-        NHL.MapPut("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, NHLRoster roster) =>
+        NHL.MapPut("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -74,7 +91,24 @@ public static class NhlEndpoints
                 });
             }
 
-            bool ret = await repo.UpdateNHLRoster(roster, logger);
+            // Validate structured fields (height, weight, age, position, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NHL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            bool ret = await repo.UpdateNHLRoster(sanitizedRoster, logger);
 
             if (ret == true)
             {
