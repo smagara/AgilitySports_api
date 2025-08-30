@@ -27,7 +27,7 @@ public static class NbaEndpoints
             }
         });
 
-        NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, NBARoster roster) =>
+        NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -43,7 +43,24 @@ public static class NbaEndpoints
                 });
             }
 
-            NBARoster? newPlayer = await repo.CreateNBARoster(roster, logger);
+            // Validate structured fields (height, weight, age, position, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NBA roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            NBARoster? newPlayer = await repo.CreateNBARoster(sanitizedRoster, logger);
 
             if (newPlayer != null)
             {
@@ -55,7 +72,7 @@ public static class NbaEndpoints
             }
         });
 
-        NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, NBARoster roster) =>
+        NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -71,7 +88,24 @@ public static class NbaEndpoints
                 });
             }
 
-            bool ret = await repo.UpdateNBARoster(roster, logger);
+            // Validate structured fields (height, weight, age, position, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NBA roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            bool ret = await repo.UpdateNBARoster(sanitizedRoster, logger);
 
             if (ret == true)
             {

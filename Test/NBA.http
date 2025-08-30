@@ -19,7 +19,7 @@ Content-Type: application/json
   "Team": "76ers",
   "Number": "13",
   "Position": "C",
-  "Height": "6' 5\"",
+  "Height": "6'5\"",
   "Weight": "233",
   "DateOfBirth": "1992-04-26T00:00:00",
   "College": "Rutgers"
@@ -34,4 +34,14 @@ Content-Type: application/json
   "playerID": 280,
   "FirstName": "Maxi",
   "LastName": "Mouse"
+}
+
+
+### Update NBA player (Fail)
+PUT {{url}}NBA/roster
+Content-Type: application/json
+
+{
+  "playerID": 5,
+  "Height": "6' 5\""
 }

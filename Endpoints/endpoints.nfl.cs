@@ -29,7 +29,7 @@ public static class NflEndpoints
         });
 
         // Create
-        NFL.MapPost("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, NFLRoster roster) =>
+        NFL.MapPost("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator,  NFLRoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -45,7 +45,24 @@ public static class NflEndpoints
                 });
             }
 
-            NFLRoster? newPlayer = await repo.Create(roster, logger);
+            // Validate structured fields (height, weight, age, position, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NFL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            NFLRoster? newPlayer = await repo.Create(sanitizedRoster, logger);
 
             if (newPlayer != null)
             {
@@ -58,7 +75,7 @@ public static class NflEndpoints
         });
 
         // Update
-        NFL.MapPut("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, NFLRoster roster) =>
+        NFL.MapPut("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NFLRoster roster) =>
         {
             // Validate for XSS patterns
             var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
@@ -74,7 +91,24 @@ public static class NflEndpoints
                 });
             }
 
-            bool ret = await repo.Update(roster, logger);
+            // Validate structured fields (height, weight, age, position, etc.)
+            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+            
+            if (!isValidStructured)
+            {
+                logger.LogWarning("Validation errors in NFL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                return Results.BadRequest(new 
+                { 
+                    Error = "Validation failed", 
+                    Message = "The request contains invalid data for structured fields.",
+                    Details = validationErrors
+                });
+            }
+
+            // Sanitize input after all validation passes
+            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+            bool ret = await repo.Update(sanitizedRoster, logger);
 
             if (ret == true)
             {

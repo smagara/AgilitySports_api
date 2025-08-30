@@ -5,3 +5,6 @@ GET {{url}}/positions?sport=NHL
 
 ### list of NBA position codes
 GET {{url}}/positions?sport=NBA
+
+### list of NFL position codes
+GET {{url}}/positions?sport=NFL
