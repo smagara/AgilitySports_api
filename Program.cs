@@ -20,7 +20,7 @@ ILoggingBuilder logB = builder.Logging.AddLog4Net(
     }
     );
 
-// add all new APIs here
+// add all new APIs here, and register all dependancies to be injected
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
@@ -30,6 +30,7 @@ builder.Services.AddScoped<IStaticData, StaticData>();
 builder.Services.AddScoped<IXssValidationService, XssValidationService>();
 builder.Services.AddScoped<IInputSanitizationService, InputSanitizationService>();
 builder.Services.AddScoped<IInputValidationService, InputValidationService>();
+builder.Services.AddScoped<IRosterExistenceService, RosterExistenceService>();
 
 builder.Services.AddCors();  // CORS Error: XMLHttpRequest. has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
 var app = builder.Build();
