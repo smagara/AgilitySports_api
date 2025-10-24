@@ -5,17 +5,49 @@ using AgilitySportsAPI.Dtos;
 using Dapper;
 //using System.Text.Json;
 using AgilitySportsAPI.Utilities;
+using AgilitySportsAPI.Services;
 
 
 namespace AgilitySportsAPI.Data;
 public class MLBRepo : BaseRepo, IMLBRepo
 {
     private readonly IColorWheel colors;
+    private readonly IRosterExistenceService _existenceService;
 
-    public MLBRepo(ILogger<MLBRoster> logger, IConfiguration configuration, IColorWheel colors)
+    public MLBRepo(ILogger<MLBRoster> logger, IConfiguration configuration, IColorWheel colors, IRosterExistenceService existenceService)
         : base(configuration)
     {
         this.colors = colors;
+        _existenceService = existenceService;
+    }
+    // Example update method for MLB Roster
+    public async Task<bool> UpdateMLBRoster(MLBRoster roster, ILogger<MLBRoster> logger)
+    {
+        logger.LogInformation("Updating MLB Roster");
+        try
+        {
+            if (string.IsNullOrEmpty(roster.PlayerID))
+            {
+                logger.LogWarning("MLB Roster update failed: PlayerID is null or empty.");
+                return false;
+            }
+            if (!await _existenceService.ExistsAsync<MLBRoster>(roster.PlayerID, base.connectionString))
+            {
+                logger.LogWarning($"MLB Roster with PlayerID {roster.PlayerID} not found.");
+                return false;
+            }
+            using (var connection = new SqlConnection(base.connectionString))
+            {
+                await base.GenToken(connection);
+                await connection.UpdateAsync(roster);
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error updating MLB Roster: " + ex.Message);
+            return false;
+        }
     }
 
     #region MLB.Roster
@@ -34,7 +66,7 @@ public class MLBRepo : BaseRepo, IMLBRepo
     {
         var sql = @"
             select 
-                PlayerId
+                PlayerID
                 ,FirstName
                 ,LastName
                 ,TeamName
