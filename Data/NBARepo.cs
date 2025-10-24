@@ -3,12 +3,16 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
+using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NBARepo : BaseRepo, INBARepo
 {
-    public NBARepo(IConfiguration configuration) : base(configuration)
+    private readonly IRosterExistenceService _existenceService;
+
+    public NBARepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
     {
+        _existenceService = existenceService;
     }
 
     public async Task<IEnumerable<NBARosterDto>?> GetNBARoster(ILogger<NBARoster> logger, int? playerId)
@@ -76,19 +80,16 @@ public class NBARepo : BaseRepo, INBARepo
     {
         try
         {
+            if (!await _existenceService.ExistsAsync<NBARoster>(roster.playerID, base.connectionString))
+            {
+                logger.LogWarning($"NBA Roster with PlayerID {roster.playerID} not found.");
+                return false;
+            }
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
-
-                // Retrieve the existing record
-                var existingRoster = await connection.GetAsync<NBARoster>(roster.playerID);
-                if (existingRoster == null)
-                {
-                    logger.LogWarning($"NBA Roster with PlayerID {roster.playerID} not found.");
-                    return false;
-                }
-
                 // Use reflection to update properties that are not null (Sparse update)
+                var existingRoster = await connection.GetAsync<NBARoster>(roster.playerID);
                 var properties = typeof(NBARoster).GetProperties();
                 foreach (var property in properties)
                 {
@@ -103,7 +104,6 @@ public class NBARepo : BaseRepo, INBARepo
                         Console.WriteLine("NBA Not updating Null " + property.Name);
                     }
                 }
-
                 await connection.UpdateAsync(existingRoster);
                 return true;
             }

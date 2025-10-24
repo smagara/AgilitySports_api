@@ -3,12 +3,16 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
+using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NFLRepo : BaseRepo, INFLRepo
 {
-    public NFLRepo(IConfiguration configuration) : base(configuration)
+    private readonly IRosterExistenceService _existenceService;
+
+    public NFLRepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
     {
+        _existenceService = existenceService;
     }
 
     #region NFL
@@ -73,6 +77,11 @@ public class NFLRepo : BaseRepo, INFLRepo
         logger.LogInformation("Updating NFL Roster");
         try
         {
+            if (!await _existenceService.ExistsAsync<NFLRoster>(player.PlayerId, base.connectionString))
+            {
+                logger.LogWarning($"NFL Roster with PlayerID {player.PlayerId} not found.");
+                return false;
+            }
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
@@ -91,10 +100,17 @@ public class NFLRepo : BaseRepo, INFLRepo
         logger.LogInformation("Deleting NFL Roster");
         try
         {
+            if (!await _existenceService.ExistsAsync<NFLRoster>(playerId, base.connectionString))
+            {
+                logger.LogError($"Unable to Delete: NFL Roster playerId {playerId} not found");
+                return false;
+            }
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
-                return await connection.DeleteAsync(new NFLRoster { PlayerId = playerId });
+                var player = await connection.GetAsync<NFLRoster>(playerId);
+                await connection.DeleteAsync(player);
+                return true;
             }
         }
         catch (Exception ex)

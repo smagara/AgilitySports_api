@@ -3,12 +3,16 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
+using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NHLRepo : BaseRepo, INHLRepo
 {
-    public NHLRepo(IConfiguration configuration) : base(configuration)
+    private readonly IRosterExistenceService _existenceService;
+
+    public NHLRepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
     {
+        _existenceService = existenceService;
     }
 
     #region NHL
@@ -77,6 +81,11 @@ public class NHLRepo : BaseRepo, INHLRepo
     {
         try
         {
+            if (!await _existenceService.ExistsAsync<NHLRoster>(roster.playerID, base.connectionString))
+            {
+                logger.LogWarning($"NHL Roster with PlayerID {roster.playerID} not found.");
+                return false;
+            }
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
