@@ -1,7 +1,7 @@
 # Copilot Instructions for AgilitySports_api
 
 ## Project Overview
-- **Purpose:** Backend API for an Angular sports website, built with .NET Minimal API (C#), serving data for MLB, NBA, NFL, NHL, and PGA.
+- **Purpose:** Backend API for an Angular sports website, built with .NET Minimal API (C-Sharp), serving data for MLB, NBA, NFL, NHL, and PGA.
 - **Related Repos:**
   - Frontend: [AgilitySports_web](https://github.com/smagara/AgilitySports_web)
   - Database: [AgilitySports_data](https://github.com/smagara/AgilitySports_data)
