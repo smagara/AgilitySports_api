@@ -65,3 +65,22 @@ Content-Type: application/json
 
 ### delete player by PlayerID
 delete {{url}}nfl/roster/?playerID=24905
+
+### update a player that doesn't exist
+put {{url}}nfl/roster
+Content-Type: application/json
+
+{
+    "PlayerId": 999902,
+    "FirstName": "New First Name",
+    "LastName": "New Last Name",
+    "Name": "Dummy Name",
+    "Team": "New Team",
+    "Position": "QB",
+    "FantasyPosition": "QB",
+    "PositionCategory": "OFF",
+    "Height": "6'1\"",
+    "Weight": 222,
+    "Number": 13,
+    "age": 33
+}

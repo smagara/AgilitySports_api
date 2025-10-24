@@ -45,3 +45,13 @@ Content-Type: application/json
   "playerID": 5,
   "Height": "6' 5\""
 }
+
+### Update NBA player that doesn't exist
+PUT {{url}}NBA/roster
+Content-Type: application/json
+
+{
+  "playerID": 9990211,
+  "FirstName": "Maxi",
+  "LastName": "Mouse"
+}
