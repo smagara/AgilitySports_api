@@ -44,3 +44,20 @@ Content-Type: application/json
   "birthPlace": "nowhere",
   "birthCountry": "noplace"
 }
+
+### Attempt update to a player that doesn't exist
+PUT http://localhost:1106/api/nhl/roster
+Content-Type: application/json
+
+{
+  "playerID": 999901,
+  "name": "JD Grier",
+  "team": "Bruins",
+  "number": "13",
+  "position": "LW",
+  "handed": "B",
+  "age": 33,
+  "drafted": 2011,
+  "birthPlace": "nowhere",
+  "birthCountry": "noplace"
+}
