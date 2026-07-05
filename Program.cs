@@ -60,6 +60,8 @@ app.MapNflEndpoints();
 app.MapMlbEndpoints();
 app.MapNhlEndpoints();
 app.MapStaticDataEndpoints();
+// Add database health endpoint
+AgilitySportsAPI.Endpoints.HealthCheckExtensions.MapDatabaseHealthEndpoint(app, app.Configuration);
 app.Run();
 
 

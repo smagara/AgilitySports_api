@@ -46,7 +46,7 @@ public class NBARepo : BaseRepo, INBARepo
         }
         catch (Exception ex)
         {
-            logger.LogError("Error creating NHL player: " + ex.Message);
+            logger.LogError("Error creating NBA player: " + ex.Message);
             return null;
         }
     }

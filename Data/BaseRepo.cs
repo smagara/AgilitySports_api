@@ -11,7 +11,8 @@ public abstract class BaseRepo
     protected readonly IConfiguration configuration;
     protected string azureClientID = "";
     protected string azureSQLAuthURL = "";
-    protected bool azureOffline;  // set true in appsettings for local db testing
+    protected bool isAzureMode;
+    protected string databaseMode = "Azure";
     protected string connectionString = "";
 
     public BaseRepo(IConfiguration configuration)
@@ -22,19 +23,45 @@ public abstract class BaseRepo
 
     private void fetchSettings()
     {
-        // fetch azure settings
-        azureClientID = configuration.GetValue<string?>("AzureSettings:ClientID") ?? "";
-        azureSQLAuthURL = configuration.GetValue<string?>("AzureSettings:AzureSQLAuthURL") ?? "";
-        azureOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
-
-        // determine offline local or azure connection string
-        connectionString = azureOffline ?
-            (configuration.GetConnectionString("LocalConnection") ?? "") :
-            (configuration.GetConnectionString("AzureConnection") ?? "");
-
-        if (azureClientID == "" || azureSQLAuthURL == "")
+        // Prefer explicit mode selection; keep CloudOffline as backwards-compatible fallback.
+        string? configuredMode = configuration["Database:Mode"];
+        if (string.IsNullOrWhiteSpace(configuredMode))
         {
-            throw new ConfigurationErrorsException("AzureSettings not set in appsettings.json");
+            bool cloudOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
+            databaseMode = cloudOffline ? "LocalDb" : "Azure";
+        }
+        else
+        {
+            databaseMode = configuredMode.Trim();
+        }
+
+        switch (databaseMode.ToUpperInvariant())
+        {
+            case "AZURE":
+                isAzureMode = true;
+                connectionString = configuration.GetConnectionString("AzureConnection") ?? "";
+                break;
+            case "DOCKER":
+                isAzureMode = false;
+                connectionString = configuration.GetConnectionString("DockerConnection") ?? "";
+                break;
+            case "LOCALDB":
+                isAzureMode = false;
+                connectionString = configuration.GetConnectionString("LocalConnection") ?? "";
+                break;
+            default:
+                throw new ConfigurationErrorsException("Database:Mode must be Azure, Docker, or LocalDb.");
+        }
+
+        if (isAzureMode)
+        {
+            azureClientID = configuration.GetValue<string?>("AzureSettings:ClientID") ?? "";
+            azureSQLAuthURL = configuration.GetValue<string?>("AzureSettings:AzureSQLAuthURL") ?? "";
+
+            if (azureClientID == "" || azureSQLAuthURL == "")
+            {
+                throw new ConfigurationErrorsException("AzureSettings not set in appsettings.json");
+            }
         }
 
         if (connectionString == "")
@@ -45,7 +72,7 @@ public abstract class BaseRepo
 
     protected async Task GenToken(SqlConnection connection)
     {
-        if (!azureOffline)
+        if (isAzureMode)
         {
             // Determine the Azure token to create.  Default if in dev environment for testing or managed identity for production.
             Azure.Core.TokenCredential credential;
@@ -66,7 +93,7 @@ public abstract class BaseRepo
         }
         else
         {
-            Console.WriteLine("Cloud offline setting specified, using local db");
+            Console.WriteLine($"Database mode '{databaseMode}' selected; using SQL authentication/connection string without Azure token.");
         }
     }
 }
