@@ -43,7 +43,7 @@ public abstract class BaseRepo
                 break;
             case "DOCKER":
                 isAzureMode = false;
-                connectionString = configuration.GetConnectionString("DockerConnection") ?? "";
+                connectionString = configuration.GetConnectionString("DockerConnectionV2") ?? "";
                 break;
             case "LOCALDB":
                 isAzureMode = false;

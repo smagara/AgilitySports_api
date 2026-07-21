@@ -1,18 +1,13 @@
 using AgilitySportsAPI.Models;
-using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
-using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NFLRepo : BaseRepo, INFLRepo
 {
-    private readonly IRosterExistenceService _existenceService;
-
-    public NFLRepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
+    public NFLRepo(IConfiguration configuration) : base(configuration)
     {
-        _existenceService = existenceService;
     }
 
     #region NFL
@@ -24,21 +19,27 @@ public class NFLRepo : BaseRepo, INFLRepo
         {
             var sql = @"
                     select 
-                    Team
-                    , firstName
-                    , lastName
-                    , Position
-                    , Number
-                    , Height
-                    , Weight
-                    , Age
-                    , College
-                    , playerId
-                    from NFL.Roster
-                    where 
-                        (@playerId is null or playerId = @playerId)
+                        coalesce(t.teamName, p.teamCode) as Team
+                        ,p.firstName
+                        ,p.lastName
+                        ,coalesce(pc.positionDesc, p.positionCode) as Position
+                        ,convert(varchar(10), p.number) as Number
+                        ,convert(varchar(10), p.heightInches) as Height
+                        ,convert(varchar(10), p.weight) as Weight
+                        ,datediff(year, p.dateOfBirth, getdate()) as Age
+                        ,p.college as College
+                        ,p.playerId
+                    from core.Players p
+                    left join core.Teams t
+                        on t.sportCode = p.sportCode
+                        and t.teamCode = p.teamCode
+                    left join reference.PositionCodes pc
+                        on pc.sportCode = p.sportCode
+                        and pc.positionCode = p.positionCode
+                    where p.sportCode = 'NFL'
+                        and (@playerId is null or p.playerId = @playerId)
                     order by 
-                    1, 3, 2";
+                        p.playerId, p.lastName, p.firstName";
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
@@ -55,69 +56,23 @@ public class NFLRepo : BaseRepo, INFLRepo
 
     public async Task<NFLRoster?> Create(NFLRoster player, ILogger<NFLRoster> logger)
     {
-        logger.LogInformation("Creating NFL Roster");
-        try
-        {
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                await connection.InsertAsync(player);
-                return player;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error creating NFL Roster: " + ex.Message);
-            return null;
-        }
+        logger.LogError("Legacy NFL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return null;
     }
 
     public async Task<bool> Update(NFLRoster player, ILogger<NFLRoster> logger)
     {
-        logger.LogInformation("Updating NFL Roster");
-        try
-        {
-            if (!await _existenceService.ExistsAsync<NFLRoster>(player.PlayerId, base.connectionString))
-            {
-                logger.LogWarning($"NFL Roster with PlayerID {player.PlayerId} not found.");
-                return false;
-            }
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                return await connection.UpdateAsync(player);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error updating NFL Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NFL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     public async Task<bool> Delete(int playerId, ILogger<NFLRoster> logger)
     {
-        logger.LogInformation("Deleting NFL Roster");
-        try
-        {
-            if (!await _existenceService.ExistsAsync<NFLRoster>(playerId, base.connectionString))
-            {
-                logger.LogError($"Unable to Delete: NFL Roster playerId {playerId} not found");
-                return false;
-            }
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                var player = await connection.GetAsync<NFLRoster>(playerId);
-                await connection.DeleteAsync(player);
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error deleting NFL Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NFL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     #endregion

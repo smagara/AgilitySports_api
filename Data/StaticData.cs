@@ -1,7 +1,5 @@
 using AgilitySportsAPI.Models;
-using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
-using AgilitySportsAPI.Dtos;
 using Dapper;
 
 namespace AgilitySportsAPI.Data;
@@ -13,26 +11,27 @@ public class StaticData : BaseRepo, IStaticData
     {
     }
 
-    public async Task<IEnumerable<PositionCodes>?> GetPositionCodes(ILogger<PositionCodes> logger, string sport)
+    public async Task<IEnumerable<PositionCodes>?> GetPositionCodes(ILogger<PositionCodes> logger, string? sport)
     {
         try
         {
             logger.LogInformation("Fetching Position Codes");
+            var normalizedSport = string.IsNullOrWhiteSpace(sport) ? null : sport.Trim().ToUpperInvariant();
 
             var sql = @"
                     select 
-                        Sport
-                        ,PositionCode
-                        ,PositionDesc
-                    from dbo.PositionCodes
+                    sportCode as Sport
+                    ,positionCode as PositionCode
+                    ,positionDesc as PositionDesc
+                    from reference.PositionCodes
                     where 
-                        (@sport is null or Sport = @sport)
+                    (@sport is null or sportCode = @sport)
                     order by 
                     1, 2, 3";
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
-                return await connection.QueryAsync<PositionCodes>(sql, new { sport = sport });
+                return await connection.QueryAsync<PositionCodes>(sql, new { sport = normalizedSport });
             }
         }
         catch (Exception ex)

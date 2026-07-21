@@ -2,7 +2,7 @@ using Dapper.Contrib.Extensions;
 
 namespace AgilitySportsAPI.Models;
 
-[Table("NFL.roster")]
+[Table("core.Players")]
 public record NFLRoster
 {
     [Key]

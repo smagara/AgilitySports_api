@@ -1,18 +1,13 @@
 using AgilitySportsAPI.Models;
-using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
-using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NHLRepo : BaseRepo, INHLRepo
 {
-    private readonly IRosterExistenceService _existenceService;
-
-    public NHLRepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
+    public NHLRepo(IConfiguration configuration) : base(configuration)
     {
-        _existenceService = existenceService;
     }
 
     #region NHL
@@ -25,21 +20,30 @@ public class NHLRepo : BaseRepo, INHLRepo
 
             var sql = @"
                     select 
-                        Name
-                        ,Team
-                        ,Number
-                        ,Position
-                        ,Handed
-                        ,Age
-                        ,Drafted
-                        ,BirthPlace
-                        ,BirthCountry
-                        ,playerID
-                    from NHL.Roster
-                    where 
-                        (@playerId is null or playerID = @playerId)
+                        concat(p.firstName, ' ', p.lastName) as Name
+                        ,coalesce(t.teamName, p.teamCode) as Team
+                        ,convert(varchar(10), p.Number) as Number
+                        ,coalesce(pc.positionDesc, p.positionCode) as Position
+                        ,nhl.handed as Handed
+                        ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
+                        ,p.draftYear as Drafted
+                        ,p.birthCityState as BirthPlace
+                        ,p.birthCountry as BirthCountry
+                        ,p.playerID
+                    from core.Players p
+                    left join core.Teams t
+                        on t.sportCode = p.sportCode
+                        and t.teamCode = p.teamCode
+                    left join reference.PositionCodes pc
+                        on pc.sportCode = p.sportCode
+                        and pc.positionCode = p.positionCode
+                    left join stats.NHLPlayerStats nhl
+                        on nhl.sportCode = p.sportCode
+                        and nhl.playerID = p.playerID
+                    where p.sportCode = 'NHL'
+                        and (@playerId is null or p.playerID = @playerId)
                     order by 
-                    1, 3, 2";
+                        p.playerID, p.lastName, p.firstName";
             using (var connection = new SqlConnection(base.connectionString))
             {
                 await base.GenToken(connection);
@@ -55,20 +59,9 @@ public class NHLRepo : BaseRepo, INHLRepo
 
     public async Task<NHLRoster?> CreateNHLRoster(NHLRoster roster, ILogger<NHLRoster> logger)
     {
-        try
-        {
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                await connection.InsertAsync(roster);
-                return roster;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error creating NHL player: " + ex.Message);
-            return null;
-        }
+        logger.LogError("Legacy NHL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return null;
     }
 
     /// <summary>
@@ -79,25 +72,9 @@ public class NHLRepo : BaseRepo, INHLRepo
     /// <returns>A task that represents the asynchronous update operation. The task result contains a boolean indicating whether the update was successful.</returns>
     public async Task<bool> UpdateNHLRoster(NHLRoster roster, ILogger<NHLRoster> logger)
     {
-        try
-        {
-            if (!await _existenceService.ExistsAsync<NHLRoster>(roster.playerID, base.connectionString))
-            {
-                logger.LogWarning($"NHL Roster with PlayerID {roster.playerID} not found.");
-                return false;
-            }
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                await connection.UpdateAsync(roster);
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error updating NHL Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NHL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     /// <summary>
@@ -108,28 +85,9 @@ public class NHLRepo : BaseRepo, INHLRepo
     /// <returns>A task that represents the asynchronous delete operation. The task result contains a boolean indicating whether the delete was successful.</returns>
     public async Task<bool> DeleteNHLRoster(int playerId, ILogger<NHLRoster> logger)
     {
-        try
-        {
-            using var connection = new SqlConnection(base.connectionString);
-            await base.GenToken(connection);
-            var roster = await connection.GetAsync<NHLRoster>(playerId);
-            if (roster != null)
-            {
-                await connection.DeleteAsync(roster);
-            }
-            else
-            {
-                logger.LogError($"Unable to Delete: NHL Roster playerId {playerId} not found");
-                return false;
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error deleting NHL Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NHL roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     #endregion

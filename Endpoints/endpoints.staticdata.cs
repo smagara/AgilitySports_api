@@ -12,16 +12,21 @@ public static class StaticDataEndpoints
     public static void MapStaticDataEndpoints(this IEndpointRouteBuilder routes)
     {
         var staticData = routes.MapGroup("api/staticdata");
-        staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
+        staticData.MapGet("positions", async (
+            ILogger<PositionCodes> logger,
+            IStaticData repoPosition,
+            string? sport,
+            string? sportCode) =>
         {
-            var results = await repoPosition.GetPositionCodes(logger, sport);
+            var requestedSport = !string.IsNullOrWhiteSpace(sportCode) ? sportCode : sport;
+            var results = await repoPosition.GetPositionCodes(logger, requestedSport);
             if (results != null)
             {
                 return Results.Ok(results);
             }
             else
             {
-                return Results.Problem("Error fetching sport Positions for " + sport + ", ask your admin to check the logs.");
+                return Results.Problem("Error fetching sport Positions for " + requestedSport + ", ask your admin to check the logs.");
             }
         });
     }

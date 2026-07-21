@@ -3,7 +3,7 @@ using Dapper.Contrib.Extensions;
 
 namespace AgilitySportsAPI.Models;
 
-[Table("MLB.attendance")]
+[Table("stats.Attendance")]
 public record MLBAttendance
 {
     [Key]

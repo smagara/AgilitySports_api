@@ -8,3 +8,6 @@ GET {{url}}/positions?sport=NBA
 
 ### list of NFL position codes
 GET {{url}}/positions?sport=NFL
+
+### list of NFL position codes (sportCode alias)
+GET {{url}}/positions?sportCode=NFL
