@@ -1,7 +1,7 @@
 // This file contains the endpoints for static data operations such as fetching position codes.
 
 using AgilitySportsAPI.Data;
-using AgilitySportsAPI.Models;
+using AgilitySportsAPI.Dtos;
 
 public static class StaticDataEndpoints
 {
@@ -13,7 +13,7 @@ public static class StaticDataEndpoints
     {
         var staticData = routes.MapGroup("api/staticdata");
         staticData.MapGet("positions", async (
-            ILogger<PositionCodes> logger,
+            ILogger<PositionCodesDTO> logger,
             IStaticData repoPosition,
             string? sport,
             string? sportCode) =>
