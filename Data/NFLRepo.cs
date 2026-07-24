@@ -19,15 +19,20 @@ public class NFLRepo : BaseRepo, INFLRepo
         {
             var sql = @"
                     select 
-                        coalesce(t.teamName, p.teamCode) as Team
+                        p.teamCode as TeamCode
+                        ,p.teamCode as Team
+                        ,coalesce(t.teamShortName, t.teamName, p.teamCode) as TeamName
+                        ,t.league as League
                         ,p.firstName
                         ,p.lastName
                         ,coalesce(pc.positionDesc, p.positionCode) as Position
                         ,convert(varchar(10), p.number) as Number
                         ,convert(varchar(10), p.heightInches) as Height
                         ,convert(varchar(10), p.weight) as Weight
-                        ,datediff(year, p.dateOfBirth, getdate()) as Age
+                        ,p.dateOfBirth as DateOfBirth
+                        ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
                         ,p.college as College
+                        ,p.draftYear as YearDrafted
                         ,p.playerId
                     from core.Players p
                     left join core.Teams t

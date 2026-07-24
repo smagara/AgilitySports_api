@@ -21,12 +21,22 @@ public class NHLRepo : BaseRepo, INHLRepo
             var sql = @"
                     select 
                         concat(p.firstName, ' ', p.lastName) as Name
-                        ,coalesce(t.teamName, p.teamCode) as Team
+                        ,p.firstName as FirstName
+                        ,p.lastName as LastName
+                        ,p.teamCode as TeamCode
+                        ,p.teamCode as Team
+                        ,coalesce(t.teamShortName, t.teamName, p.teamCode) as TeamName
+                        ,t.league as League
                         ,convert(varchar(10), p.Number) as Number
                         ,coalesce(pc.positionDesc, p.positionCode) as Position
+                        ,convert(varchar(10), p.heightInches) as Height
+                        ,convert(varchar(10), p.weight) as Weight
+                        ,p.dateOfBirth as DateOfBirth
                         ,nhl.handed as Handed
                         ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
                         ,p.draftYear as Drafted
+                        ,p.draftYear as YearDrafted
+                        ,p.college as College
                         ,p.birthCityState as BirthPlace
                         ,p.birthCountry as BirthCountry
                         ,p.playerID

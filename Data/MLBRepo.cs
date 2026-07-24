@@ -33,7 +33,8 @@ public class MLBRepo : BaseRepo, IMLBRepo
                 convert(varchar(20), p.playerID) as PlayerID
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
-                ,coalesce(t.teamName, p.teamCode) as TeamName
+                ,p.teamCode as TeamCode
+                ,coalesce(t.teamShortName, p.teamCode) as TeamName
                 ,null as League
                 ,convert(varchar(10), p.number) as Number
                 ,coalesce(pc.positionDesc, p.positionCode) as Position
@@ -72,16 +73,19 @@ public class MLBRepo : BaseRepo, IMLBRepo
                 convert(varchar(20), p.playerID) as PlayerID
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
-                ,coalesce(t.teamName, p.teamCode) as TeamName
+                ,p.teamCode as TeamCode
+                ,coalesce(t.teamShortName, p.teamCode) as TeamName
+                ,t.league as League
+                ,convert(varchar(10), p.number) as Number
                 ,coalesce(pc.positionDesc, p.positionCode) as Position
                 ,mlb.bats as Bats
                 ,mlb.throws as Throws
                 ,coalesce(convert(datetime, p.dateOfBirth), convert(datetime, '1900-01-01')) as DateOfBirth
                 ,convert(varchar(10), p.heightInches) as Height
                 ,convert(varchar(10), p.weight) as Weight
-                ,null as League
                 ,p.birthCityState as BirthPlace
                 ,p.birthCountry as BirthCountry
+                ,p.draftYear as YearDrafted
             from core.Players p
             left join core.Teams t
                 on t.sportCode = p.sportCode

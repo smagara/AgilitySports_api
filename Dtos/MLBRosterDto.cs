@@ -6,6 +6,7 @@ public class MLBRosterDto
     public string? playerID { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public string? TeamCode { get; set; }
     public string? TeamName { get; set; }    
     public string? League { get; set; }
     public string? Number { get; set; }
@@ -17,4 +18,5 @@ public class MLBRosterDto
     public DateTime DateOfBirth { get; set; }
     public string? BirthCountry { get; set; }
     public string? BirthPlace { get; set; }
+    public short? YearDrafted { get; set; }
 }

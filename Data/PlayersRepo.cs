@@ -34,7 +34,7 @@ public class PlayersRepo : IPlayersRepo
                         p.playerID as PlayerID
                         ,p.sportCode as SportCode
                         ,p.teamCode as TeamCode
-                        ,t.teamName as TeamName
+                        ,t.teamShortName as TeamName
                         ,p.positionCode as PositionCode
                         ,pc.positionDesc as PositionDesc
                         ,p.firstName as FirstName
@@ -87,7 +87,7 @@ public class PlayersRepo : IPlayersRepo
                         p.playerID as PlayerID
                         ,p.sportCode as SportCode
                         ,p.teamCode as TeamCode
-                        ,t.teamName as TeamName
+                        ,t.teamShortName as TeamName
                         ,p.positionCode as PositionCode
                         ,pc.positionDesc as PositionDesc
                         ,p.firstName as FirstName
@@ -176,11 +176,11 @@ public class PlayersRepo : IPlayersRepo
                     ,firstName
                     ,lastName
                     ,dateOfBirth
-                    ,height
+                    ,heightInches
                     ,weight
                     ,number
                     ,college
-                    ,birthplace
+                    ,birthCityState
                     ,draftYear
                     ,seasonYear
                 )
@@ -238,13 +238,13 @@ public class PlayersRepo : IPlayersRepo
                     ,firstName = @firstName
                     ,lastName = @lastName
                     ,dateOfBirth = @dateOfBirth
-                    ,height = @height
+                    ,heightInches = @height
                     ,weight = @weight
                     ,number = @number
                     ,college = @college
-                    ,birthplace = @birthplace
-                    ,draftYear = @draftYear
-                    ,seasonYear = @seasonYear
+                    ,birthCityState = @birthplace
+                    ,draftYear = coalesce(@draftYear, draftYear)
+                    ,seasonYear = coalesce(@seasonYear, seasonYear)
                 where playerID = @playerId;";
 
         var rows = await connection.ExecuteAsync(

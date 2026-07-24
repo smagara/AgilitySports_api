@@ -20,13 +20,17 @@ public class NBARepo : BaseRepo, INBARepo
             select p.playerID
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
-                ,coalesce(t.teamName, p.teamCode) as Team
+                ,p.teamCode as TeamCode
+                ,p.teamCode as Team
+                ,t.teamShortName as TeamName
+                ,t.league as League
                 ,coalesce(pc.positionDesc, p.positionCode) as Position
                 ,convert(varchar(10), p.number) as Number
                 ,convert(varchar(10), p.heightInches) as Height
                 ,convert(varchar(10), p.weight) as Weight
                 ,p.dateOfBirth as DateOfBirth
                 ,p.college as College
+                ,p.draftYear as YearDrafted
             from core.Players p
             left join core.Teams t
                 on t.sportCode = p.sportCode

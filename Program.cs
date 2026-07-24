@@ -28,6 +28,7 @@ builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 builder.Services.AddScoped<IPlayersRepo, PlayersRepo>();
 builder.Services.AddScoped<IPlayersV2WriteService, PlayersV2WriteService>();
+builder.Services.AddScoped<ILegacyRosterWriteService, LegacyRosterWriteService>();
 builder.Services.AddScoped<IStaticData, StaticData>();
 builder.Services.AddScoped<IXssValidationService, XssValidationService>();
 builder.Services.AddScoped<IInputSanitizationService, InputSanitizationService>();

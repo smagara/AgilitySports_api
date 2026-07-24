@@ -9,6 +9,7 @@ public record MLBRoster
     public string? PlayerID { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public string? TeamCode { get; set; }
     public string? TeamName { get; set; }    
     public string? League { get; set; }
     public string? Number { get; set; }

@@ -1,5 +1,6 @@
 using AgilitySportsAPI.Data;
 using AgilitySportsAPI.Dtos;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Configuration;
 
@@ -36,6 +37,16 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         using var transaction = connection.BeginTransaction();
         try
         {
+            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            {
+                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                transaction.Rollback();
+                return null;
+            }
+
+            player.TeamCode = teamCode;
+
             var createdId = await _playersRepo.CreatePlayer(connection, transaction, logger, player);
             transaction.Commit();
             return createdId;
@@ -56,6 +67,16 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         using var transaction = connection.BeginTransaction();
         try
         {
+            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            {
+                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                transaction.Rollback();
+                return false;
+            }
+
+            player.TeamCode = teamCode;
+
             var updated = await _playersRepo.UpdatePlayer(connection, transaction, logger, playerId, player);
             if (!updated)
             {
@@ -139,5 +160,37 @@ public class PlayersV2WriteService : IPlayersV2WriteService
             transaction.Rollback();
             return false;
         }
+    }
+
+    private static async Task<string?> ResolveTeamCodeAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        string? sportCode,
+        string? teamValue)
+    {
+        var normalizedSport = string.IsNullOrWhiteSpace(sportCode) ? null : sportCode.Trim().ToUpperInvariant();
+        var normalizedTeam = string.IsNullOrWhiteSpace(teamValue) ? null : teamValue.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedSport) || string.IsNullOrWhiteSpace(normalizedTeam))
+        {
+            return null;
+        }
+
+        var sql = @"
+                select top 1 teamCode
+                from core.Teams
+                where sportCode = @sportCode
+                  and (
+                        upper(teamCode) = upper(@team)
+                     or upper(teamShortName) = upper(@team)
+                     or upper(teamName) = upper(@team)
+                  );";
+
+        var resolved = await connection.QuerySingleOrDefaultAsync<string>(
+            sql,
+            new { sportCode = normalizedSport, team = normalizedTeam },
+            transaction);
+
+        return resolved?.Trim().ToUpperInvariant();
     }
 }
