@@ -15,7 +15,7 @@ public async Task<bool> UpdateNBARoster(NBARoster roster, ILogger<NBARoster> log
      } 
     catch (Exception ex) 
     { 
-        logger.LogError("Error updating NBA Roster: " + ex.Message); return false; 
+        logger.LogError(ex, "Error updating NBA Roster."); return false; 
     } 
 }
 

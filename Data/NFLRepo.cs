@@ -57,7 +57,7 @@ public class NFLRepo : BaseRepo, INFLRepo
         }
         catch (Exception ex)
         {
-            logger.LogError("Error fetching NFL roster: " + ex.Message);
+            logger.LogError(ex, "Error fetching NFL roster.");
             return null;
         }
     }

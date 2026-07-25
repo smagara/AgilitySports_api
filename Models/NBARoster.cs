@@ -23,4 +23,7 @@ public record NBARoster
     public string? BirthCountry { get; set; }
     public short? DraftYear { get; set; }
     public short? SeasonYear { get; set; }
+    public decimal? PointsPerGame { get; set; }
+    public decimal? ReboundsPerGame { get; set; }
+    public decimal? AssistsPerGame { get; set; }
 }

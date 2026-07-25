@@ -44,3 +44,10 @@ Dev Note (July 2026):
 - Request-level XSS middleware logging is now configurable and disabled by default to reduce noise.
 - Toggle with `XssLogging:EnableRequestLogging` in `appsettings.json` or `appsettings.Development.json`.
 - Default value is `false`.
+
+---
+
+## API Specifications
+
+- Overall API specification (purpose, architecture, setup, endpoint catalog, request/response conventions, usage workflow): [Docs/AgilitySports_API_Overall_Specification.docx](Docs/AgilitySports_API_Overall_Specification.docx)
+- Player/stats contract specification (cross-sport stat field mapping and persistence behavior): [Docs/AgilitySports_API_PlayerStats_Spec.docx](Docs/AgilitySports_API_PlayerStats_Spec.docx)

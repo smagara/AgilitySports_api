@@ -62,7 +62,7 @@ public class NHLRepo : BaseRepo, INHLRepo
         }
         catch (Exception ex)
         {
-            logger.LogError("Error creating NHL player: " + ex.Message);
+            logger.LogError(ex, "Error creating NHL player.");
             return null;
         }
     }

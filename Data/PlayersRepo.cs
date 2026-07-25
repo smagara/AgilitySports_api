@@ -72,7 +72,7 @@ public class PlayersRepo : IPlayersRepo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching V2 players: " + ex.Message);
+            logger.LogError(ex, "Error fetching V2 players.");
             return null;
         }
     }
@@ -108,7 +108,7 @@ public class PlayersRepo : IPlayersRepo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching V2 player by ID: " + ex.Message);
+            logger.LogError(ex, "Error fetching V2 player by ID.");
             return null;
         }
     }
@@ -157,7 +157,7 @@ public class PlayersRepo : IPlayersRepo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching V2 player stats: " + ex.Message);
+            logger.LogError(ex, "Error fetching V2 player stats.");
             return null;
         }
     }

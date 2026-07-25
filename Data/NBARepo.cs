@@ -54,7 +54,7 @@ public class NBARepo : BaseRepo, INBARepo
         }
         catch (Exception ex)
         {
-            logger.LogError("Error creating NBA player: " + ex.Message);
+            logger.LogError(ex, "Error creating NBA player.");
             return null;
         }
     }
