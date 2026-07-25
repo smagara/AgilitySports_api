@@ -115,12 +115,19 @@ public static class MlbDataEndpoints
                     return Results.Problem("Error adding to MLB Roster, check the logs.");
                 }
 
-                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats) || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws))
+                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
+                    || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws)
+                    || sanitizedRoster.BattingAverage.HasValue
+                    || sanitizedRoster.HomeRuns.HasValue
+                    || sanitizedRoster.Era.HasValue)
                 {
                     await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
                     {
                         Bats = sanitizedRoster.Bats,
-                        Throws = sanitizedRoster.Throws
+                        Throws = sanitizedRoster.Throws,
+                        BattingAverage = sanitizedRoster.BattingAverage,
+                        HomeRuns = sanitizedRoster.HomeRuns,
+                        Era = sanitizedRoster.Era
                     });
                 }
 
@@ -196,12 +203,19 @@ public static class MlbDataEndpoints
                     return Results.NotFound("MLB player was not found or update failed.");
                 }
 
-                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats) || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws))
+                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
+                    || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws)
+                    || sanitizedRoster.BattingAverage.HasValue
+                    || sanitizedRoster.HomeRuns.HasValue
+                    || sanitizedRoster.Era.HasValue)
                 {
                     await writeService.UpsertPlayerStats(logger, playerId, new PlayerStatsUpsertDto
                     {
                         Bats = sanitizedRoster.Bats,
-                        Throws = sanitizedRoster.Throws
+                        Throws = sanitizedRoster.Throws,
+                        BattingAverage = sanitizedRoster.BattingAverage,
+                        HomeRuns = sanitizedRoster.HomeRuns,
+                        Era = sanitizedRoster.Era
                     });
                 }
 

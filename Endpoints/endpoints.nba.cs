@@ -92,6 +92,18 @@ public static class NbaEndpoints
 
                 if (createdId != null)
                 { 
+                    if (sanitizedRoster.PointsPerGame.HasValue
+                        || sanitizedRoster.ReboundsPerGame.HasValue
+                        || sanitizedRoster.AssistsPerGame.HasValue)
+                    {
+                        await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
+                        {
+                            PointsPerGame = sanitizedRoster.PointsPerGame,
+                            ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
+                            AssistsPerGame = sanitizedRoster.AssistsPerGame
+                        });
+                    }
+
                     return Results.Ok("Added to NBA Roster.");
                 }
                 else
@@ -164,6 +176,18 @@ public static class NbaEndpoints
 
                 if (updated)
                 {
+                    if (sanitizedRoster.PointsPerGame.HasValue
+                        || sanitizedRoster.ReboundsPerGame.HasValue
+                        || sanitizedRoster.AssistsPerGame.HasValue)
+                    {
+                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
+                        {
+                            PointsPerGame = sanitizedRoster.PointsPerGame,
+                            ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
+                            AssistsPerGame = sanitizedRoster.AssistsPerGame
+                        });
+                    }
+
                     return Results.Ok("Updated NBA Roster.");
                 }
                 else

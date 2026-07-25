@@ -94,6 +94,15 @@ public static class NflEndpoints
 
                 if (createdId != null)
                 { 
+                    if (sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue)
+                    {
+                        await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
+                        {
+                            Sacks = sanitizedRoster.Sacks,
+                            Touchdowns = sanitizedRoster.Touchdowns
+                        });
+                    }
+
                     return Results.Ok("Added to NFL Roster.");
                 }
                 else
@@ -167,6 +176,15 @@ public static class NflEndpoints
 
                 if (updated)
                 {
+                    if (sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue)
+                    {
+                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
+                        {
+                            Sacks = sanitizedRoster.Sacks,
+                            Touchdowns = sanitizedRoster.Touchdowns
+                        });
+                    }
+
                     return Results.Ok("Updated NFL Roster.");
                 }
                 else

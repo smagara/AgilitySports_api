@@ -24,5 +24,9 @@ public record NHLRoster
     public string? BirthCityState { get; set; }
     public short? DraftYear { get; set; }
     public short? SeasonYear { get; set; }
+    public int? Goals { get; set; }
+    public int? PenaltyMinutes { get; set; }
+    public int? Points { get; set; }
+    public decimal? SavePct { get; set; }
 
 }

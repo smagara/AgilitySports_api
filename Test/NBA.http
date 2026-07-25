@@ -27,7 +27,10 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "pointsPerGame" : 11,
+    "reboundsPerGame" : 2.3,
+    "assistsPerGame" : 5.6
 }
 
 
@@ -36,7 +39,7 @@ PUT {{url}}nba/roster
 Content-Type: application/json
 
 {
-    "playerId": "9000016",
+    "playerId": "9000026",
     "teamCode": "DET",
     "firstName": "Barny",
     "lastName": "Rubble",
@@ -49,7 +52,10 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "pointsPerGame" : 18,
+    "reboundsPerGame" : 7.3,
+    "assistsPerGame" : 5.9
 }
 
 

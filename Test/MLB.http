@@ -36,7 +36,12 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Penn",
     "draftYear": 2021,
-    "seasonYear" : 2026
+    "seasonYear" : 2026,
+    "bats" : "L",
+    "battingAverage": 0.336,
+    "throws": "R",
+    "homeRuns": 33,
+    "era" : 1.2
 }
 
 ### update player by playerId
@@ -57,5 +62,10 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "bats" : "L",
+    "battingAverage": 0.336,
+    "throws": "R",
+    "homeRuns": 33,
+    "era" : 1.2
 }

@@ -24,15 +24,17 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "sacks": 8,
+    "touchdowns": 3
 }
 
 ### update player by playerId
-put {{url}}nfl/roster/?playerId=9000006
+put {{url}}nfl/roster
 Content-Type: application/json
 
 {
-    "playerId": "9000006",
+    "playerId": "9000009",
     "teamCode": "ARI",
     "firstName": "Isaiah",
     "lastName": "Adams",
@@ -45,7 +47,9 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "sacks": 9,
+    "touchdowns": 4
 }
 
 ### delete player by playerId

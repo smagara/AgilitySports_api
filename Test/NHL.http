@@ -28,7 +28,12 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2021,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "handed" : "R",
+    "goals" : 3,
+    "penaltyMinutes": 95,
+    "points" : 44,
+    "savePct" : 0
 }
 
 
@@ -37,7 +42,7 @@ PUT {{url}}nhl/roster
 Content-Type: application/json
 
 {
-    "playerId": "9000019",
+    "playerId": "9000031",
     "teamCode": "WSH",
     "firstName": "Barny",
     "lastName": "Flintstone",
@@ -50,7 +55,12 @@ Content-Type: application/json
     "birthCountry" : "United States",
     "college": "Illinois",
     "draftYear": 2020,
-    "seasonYear" : 2025
+    "seasonYear" : 2025,
+    "handed" : "L",
+    "goals" : 3,
+    "penaltyMinutes": 123,
+    "points" : 24,
+    "savePct" : 0.43
 }
 
 ### Attempt update to a player that doesn't exist
