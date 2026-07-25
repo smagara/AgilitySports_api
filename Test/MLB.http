@@ -45,11 +45,11 @@ Content-Type: application/json
 }
 
 ### update player by playerId
-put {{url}}mlb/roster/?playerId=9000012
+put {{url}}mlb/roster
 Content-Type: application/json
 
 {
-    "playerId": "9000012",
+    "playerId": "9000035",
     "teamCode": "CIN",
     "firstName": "Isaiah",
     "lastName": "Adams",

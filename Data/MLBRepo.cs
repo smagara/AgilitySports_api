@@ -40,6 +40,9 @@ public class MLBRepo : BaseRepo, IMLBRepo
                 ,coalesce(pc.positionDesc, p.positionCode) as Position
                 ,mlb.throws as Throws
                 ,mlb.bats as Bats
+                ,mlb.battingAverage as BattingAverage
+                ,mlb.homeRuns as HomeRuns
+                ,mlb.era as Era
                 ,convert(varchar(10), p.heightInches) as Height
                 ,convert(varchar(10), p.weight) as Weight
                 ,coalesce(convert(datetime, p.dateOfBirth), convert(datetime, '1900-01-01')) as DateOfBirth
@@ -80,6 +83,9 @@ public class MLBRepo : BaseRepo, IMLBRepo
                 ,coalesce(pc.positionDesc, p.positionCode) as Position
                 ,mlb.bats as Bats
                 ,mlb.throws as Throws
+                ,mlb.battingAverage as BattingAverage
+                ,mlb.homeRuns as HomeRuns
+                ,mlb.era as Era
                 ,coalesce(convert(datetime, p.dateOfBirth), convert(datetime, '1900-01-01')) as DateOfBirth
                 ,convert(varchar(10), p.heightInches) as Height
                 ,convert(varchar(10), p.weight) as Weight
