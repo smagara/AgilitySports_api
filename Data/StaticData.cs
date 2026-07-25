@@ -36,7 +36,7 @@ public class StaticData : BaseRepo, IStaticData
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error fetching Position codes for the Sport:  " + sport + ".");
+            logger.LogError(ex, "Error fetching Position codes for sport {Sport}.", sport);
             return null;
         }
     }
@@ -68,7 +68,7 @@ public class StaticData : BaseRepo, IStaticData
         }
         catch (Exception ex)
         {
-            logger.LogError("Error fetching team static data for sport {Sport}: {Message}", sport, ex.Message);
+            logger.LogError(ex, "Error fetching team static data for sport {Sport}.", sport);
             return null;
         }
     }
