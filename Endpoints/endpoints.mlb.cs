@@ -109,26 +109,26 @@ public static class MlbDataEndpoints
                     });
                 }
 
-                var createdId = await writeService.CreatePlayer(logger, player);
-                if (createdId == null)
-                {
-                    return Results.Problem("Error adding to MLB Roster, check the logs.");
-                }
-
-                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
+                var hasStats = !string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
                     || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws)
                     || sanitizedRoster.BattingAverage.HasValue
                     || sanitizedRoster.HomeRuns.HasValue
-                    || sanitizedRoster.Era.HasValue)
-                {
-                    await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
+                    || sanitizedRoster.Era.HasValue;
+
+                var createdId = hasStats
+                    ? await writeService.CreatePlayerWithStats(logger, player, new PlayerStatsUpsertDto
                     {
                         Bats = sanitizedRoster.Bats,
                         Throws = sanitizedRoster.Throws,
                         BattingAverage = sanitizedRoster.BattingAverage,
                         HomeRuns = sanitizedRoster.HomeRuns,
                         Era = sanitizedRoster.Era
-                    });
+                    })
+                    : await writeService.CreatePlayer(logger, player);
+
+                if (createdId == null)
+                {
+                    return Results.Problem("Error adding to MLB Roster, check the logs.");
                 }
 
                 return Results.Ok("Added to MLB Roster.");
@@ -197,26 +197,45 @@ public static class MlbDataEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, playerId, player);
-                if (!updated)
-                {
-                    return Results.NotFound("MLB player was not found or update failed.");
-                }
-
-                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
+                var hasStats = !string.IsNullOrWhiteSpace(sanitizedRoster.Bats)
                     || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws)
                     || sanitizedRoster.BattingAverage.HasValue
                     || sanitizedRoster.HomeRuns.HasValue
-                    || sanitizedRoster.Era.HasValue)
-                {
-                    await writeService.UpsertPlayerStats(logger, playerId, new PlayerStatsUpsertDto
+                    || sanitizedRoster.Era.HasValue;
+
+                var updateOutcome = hasStats
+                    ? await writeService.UpdatePlayerWithStatsDetailed(logger, playerId, player, new PlayerStatsUpsertDto
                     {
                         Bats = sanitizedRoster.Bats,
                         Throws = sanitizedRoster.Throws,
                         BattingAverage = sanitizedRoster.BattingAverage,
                         HomeRuns = sanitizedRoster.HomeRuns,
                         Era = sanitizedRoster.Era
+                    })
+                    : await writeService.UpdatePlayerDetailed(logger, playerId, player);
+
+                if (updateOutcome == PlayerWriteOutcome.NotFound)
+                {
+                    return Results.NotFound("MLB player was not found or update failed.");
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.InvalidTeam)
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code could not be resolved for MLB."
                     });
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.StatsFailed)
+                {
+                    return Results.Problem("MLB player update failed while writing stats. Check logs for details.");
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.Error)
+                {
+                    return Results.Problem("Error updating MLB Roster, check the logs.");
                 }
 
                 return Results.Ok("Updated MLB Roster.");

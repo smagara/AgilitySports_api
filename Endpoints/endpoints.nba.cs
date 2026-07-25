@@ -88,22 +88,21 @@ public static class NbaEndpoints
                     });
                 }
 
-                var createdId = await writeService.CreatePlayer(logger, player);
+                var hasStats = sanitizedRoster.PointsPerGame.HasValue
+                    || sanitizedRoster.ReboundsPerGame.HasValue
+                    || sanitizedRoster.AssistsPerGame.HasValue;
+
+                var createdId = hasStats
+                    ? await writeService.CreatePlayerWithStats(logger, player, new PlayerStatsUpsertDto
+                    {
+                        PointsPerGame = sanitizedRoster.PointsPerGame,
+                        ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
+                        AssistsPerGame = sanitizedRoster.AssistsPerGame
+                    })
+                    : await writeService.CreatePlayer(logger, player);
 
                 if (createdId != null)
                 { 
-                    if (sanitizedRoster.PointsPerGame.HasValue
-                        || sanitizedRoster.ReboundsPerGame.HasValue
-                        || sanitizedRoster.AssistsPerGame.HasValue)
-                    {
-                        await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
-                        {
-                            PointsPerGame = sanitizedRoster.PointsPerGame,
-                            ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
-                            AssistsPerGame = sanitizedRoster.AssistsPerGame
-                        });
-                    }
-
                     return Results.Ok("Added to NBA Roster.");
                 }
                 else
@@ -172,28 +171,44 @@ public static class NbaEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
+                var hasStats = sanitizedRoster.PointsPerGame.HasValue
+                    || sanitizedRoster.ReboundsPerGame.HasValue
+                    || sanitizedRoster.AssistsPerGame.HasValue;
 
-                if (updated)
-                {
-                    if (sanitizedRoster.PointsPerGame.HasValue
-                        || sanitizedRoster.ReboundsPerGame.HasValue
-                        || sanitizedRoster.AssistsPerGame.HasValue)
+                var updateOutcome = hasStats
+                    ? await writeService.UpdatePlayerWithStatsDetailed(logger, sanitizedRoster.PlayerId, player, new PlayerStatsUpsertDto
                     {
-                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
-                        {
-                            PointsPerGame = sanitizedRoster.PointsPerGame,
-                            ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
-                            AssistsPerGame = sanitizedRoster.AssistsPerGame
-                        });
-                    }
+                        PointsPerGame = sanitizedRoster.PointsPerGame,
+                        ReboundsPerGame = sanitizedRoster.ReboundsPerGame,
+                        AssistsPerGame = sanitizedRoster.AssistsPerGame
+                    })
+                    : await writeService.UpdatePlayerDetailed(logger, sanitizedRoster.PlayerId, player);
 
+                if (updateOutcome == PlayerWriteOutcome.Success)
+                {
                     return Results.Ok("Updated NBA Roster.");
                 }
-                else
+
+                if (updateOutcome == PlayerWriteOutcome.NotFound)
                 {
                     return Results.NotFound("NBA player was not found or update failed.");
                 }
+
+                if (updateOutcome == PlayerWriteOutcome.InvalidTeam)
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code could not be resolved for NBA."
+                    });
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.StatsFailed)
+                {
+                    return Results.Problem("NBA player update failed while writing stats. Check logs for details.");
+                }
+
+                return Results.Problem("Error updating NBA Roster, check the logs.");
             });
 
             nba.MapDelete("roster", async (ILogger<NBARoster> logger, IPlayersV2WriteService writeService, int playerId) =>
