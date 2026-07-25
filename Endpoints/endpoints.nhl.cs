@@ -1,6 +1,7 @@
 // This file contains the endpoints for NHL-related operations such as CRUD operations on the NHL roster.
 
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Dtos;
 using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Services;
 
@@ -12,129 +13,219 @@ public static class NhlEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapNhlEndpoints(this IEndpointRouteBuilder routes)
     {
-        var NHL = routes.MapGroup("api/nhl");
-
-        // Read
-        NHL.MapGet("roster", async (ILogger<NHLRoster> logger, int? playerId, INHLRepo repo) =>
+        void MapNhlRoutes(RouteGroupBuilder nhl)
         {
-            var results = await repo.GetNHLRoster(logger, playerId);
-            if (results != null)
+            // Read
+            nhl.MapGet("roster", async (ILogger<NHLRoster> logger, int? playerId, INHLRepo repo) =>
             {
-                return Results.Ok(results);
-            }
-            else
-            {
-                return Results.Problem("Error fetching NHL Roster, ask your admin to check the logs.");
-            }
-        });
+                var results = await repo.GetNHLRoster(logger, playerId);
+                if (results != null)
+                {
+                    return Results.Ok(results);
+                }
+                else
+                {
+                    return Results.Problem("Error fetching NHL Roster, ask your admin to check the logs.");
+                }
+            });
 
-        // Create
-        NHL.MapPost("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
+            // Create
+            nhl.MapPost("roster", async (ILogger<NHLRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
+            {
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+
+                if (!isValid)
+                { 
+                    logger.LogWarning("XSS attempt blocked in NHL roster creation. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
+
+                // Validate structured fields (height, weight, age, position, handed, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
+                { 
+                    logger.LogWarning("Validation errors in NHL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
+
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+                var (firstName, lastName) = SplitName(sanitizedRoster.Name);
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NHL",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = firstName,
+                    LastName = lastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    Birthplace = sanitizedRoster.BirthPlace,
+                    DraftYear = sanitizedRoster.Drafted
+                };
+
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
+
+                var createdId = await writeService.CreatePlayer(logger, player);
+
+                if (createdId != null)
+                { 
+                    if (!string.IsNullOrWhiteSpace(sanitizedRoster.Handed))
+                    {
+                        await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
+                        {
+                            Handed = sanitizedRoster.Handed
+                        });
+                    }
+
+                    return Results.Ok("Added to NHL Roster.");
+                }
+                else
+                { 
+                    return Results.Problem("Error adding to NHL Roster, check the logs.");
+                }
+            });
+
+            // Update
+            nhl.MapPut("roster", async (ILogger<NHLRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
+            {
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+
+                if (!isValid)
+                {
+                    logger.LogWarning("XSS attempt blocked in NHL roster update. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
+
+                // Validate structured fields (height, weight, age, position, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
+                {
+                    logger.LogWarning("Validation errors in NHL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
+
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+                var (firstName, lastName) = SplitName(sanitizedRoster.Name);
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NHL",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = firstName,
+                    LastName = lastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    Birthplace = sanitizedRoster.BirthPlace,
+                    DraftYear = sanitizedRoster.Drafted
+                };
+
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
+
+                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.playerID, player);
+
+                if (updated)
+                {
+                    if (!string.IsNullOrWhiteSpace(sanitizedRoster.Handed))
+                    {
+                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.playerID, new PlayerStatsUpsertDto
+                        {
+                            Handed = sanitizedRoster.Handed
+                        });
+                    }
+
+                    return Results.Ok("Updated the NHL Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NHL player was not found or update failed.");
+                }
+            });
+
+            // Delete
+            nhl.MapDelete("roster", async (ILogger<NHLRoster> logger, IPlayersV2WriteService writeService, int playerId) =>
+            {
+                var deleted = await writeService.DeletePlayer(logger, playerId);
+
+                if (deleted)
+                {
+                    return Results.Ok("Deleted from NHL Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NHL player was not found or delete failed.");
+                }
+            });
+        }
+
+        MapNhlRoutes(routes.MapGroup("api/nhl"));
+        MapNhlRoutes(routes.MapGroup("api/v2/nhl"));
+    }
+
+    private static int? ParseNullableInt(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
         {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
-            {
-                logger.LogWarning("XSS attempt blocked in NHL roster creation. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
-                { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
+            return null;
+        }
 
-            // Validate structured fields (height, weight, age, position, handed, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NHL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
-                { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
+        return int.TryParse(value.Trim(), out var parsed) ? parsed : null;
+    }
 
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-
-            NHLRoster? newPlayer = await repo.CreateNHLRoster(sanitizedRoster, logger);
-
-            if (newPlayer != null)
-            {
-                return Results.Ok("Added to NHL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error adding to NHL Roster, check the logs.");
-            }
-        });
-
-        // Update
-        NHL.MapPut("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NHLRoster roster) =>
+    private static (string? FirstName, string? LastName) SplitName(string? fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
         {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
-            {
-                logger.LogWarning("XSS attempt blocked in NHL roster update. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
-                { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
+            return (null, null);
+        }
 
-            // Validate structured fields (height, weight, age, position, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NHL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
-                { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
-
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-
-            bool ret = await repo.UpdateNHLRoster(sanitizedRoster, logger);
-
-            if (ret == true)
-            {
-                return Results.Ok("Updated NHL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error updating the NHL Roster, check the logs.");
-            }
-        });
-
-        // Delete
-        NHL.MapDelete("roster", async (ILogger<NHLRoster> logger, INHLRepo repo, int playerId) =>
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
         {
+            return (parts[0], null);
+        }
 
-            bool ret = await repo.DeleteNHLRoster(playerId, logger);
-
-            if (ret == true)
-            {
-                return Results.Ok("Deleted from NHL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error deleting from NHL Roster, check the logs.");
-
-            }
-        });
+        return (parts[0], string.Join(' ', parts.Skip(1)));
     }
 }

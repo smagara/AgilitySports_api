@@ -1,18 +1,13 @@
 using AgilitySportsAPI.Models;
-using Dapper.Contrib.Extensions;
 using Microsoft.Data.SqlClient;
 using AgilitySportsAPI.Dtos;
 using Dapper;
-using AgilitySportsAPI.Services;
 
 namespace AgilitySportsAPI.Data;
 public class NBARepo : BaseRepo, INBARepo
 {
-    private readonly IRosterExistenceService _existenceService;
-
-    public NBARepo(IConfiguration configuration, IRosterExistenceService existenceService) : base(configuration)
+    public NBARepo(IConfiguration configuration) : base(configuration)
     {
-        _existenceService = existenceService;
     }
 
     public async Task<IEnumerable<NBARosterDto>?> GetNBARoster(ILogger<NBARoster> logger, int? playerId)
@@ -22,21 +17,31 @@ public class NBARepo : BaseRepo, INBARepo
             logger.LogInformation("Fetching NBA Roster");
 
             var sql = @"
-            select playerID
-                ,FirstName
-                ,LastName
-                ,Team
-                ,Position
-                ,Number
-                ,Height
-                ,Weight
-                ,DateOfBirth
-                ,College
-            from NBA.Roster
-            where 
-                (@playerId is null or playerID = @playerId)
+            select p.playerID
+                ,p.firstName as FirstName
+                ,p.lastName as LastName
+                ,p.teamCode as TeamCode
+                ,p.teamCode as Team
+                ,t.teamShortName as TeamName
+                ,t.league as League
+                ,coalesce(pc.positionDesc, p.positionCode) as Position
+                ,convert(varchar(10), p.number) as Number
+                ,convert(varchar(10), p.heightInches) as Height
+                ,convert(varchar(10), p.weight) as Weight
+                ,p.dateOfBirth as DateOfBirth
+                ,p.college as College
+                ,p.draftYear as YearDrafted
+            from core.Players p
+            left join core.Teams t
+                on t.sportCode = p.sportCode
+                and t.teamCode = p.teamCode
+            left join reference.PositionCodes pc
+                on pc.sportCode = p.sportCode
+                and pc.positionCode = p.positionCode
+            where p.sportCode = 'NBA'
+                and (@playerId is null or p.playerID = @playerId)
             order by 
-            1, 3, 2";
+                p.playerID, p.lastName, p.firstName";
 
             using (var connection = new SqlConnection(base.connectionString))
             {
@@ -54,20 +59,8 @@ public class NBARepo : BaseRepo, INBARepo
     #region updateCrud
     public async Task<NBARoster?> CreateNBARoster(NBARoster roster, ILogger<NBARoster> logger)
     {
-        try
-        {
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                await connection.InsertAsync(roster);
-                return roster;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error creating NBA player: " + ex.Message);
-            return null;
-        }
+        logger.LogError("Legacy NBA roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        return null;
     }
 
     /// <summary>
@@ -78,41 +71,9 @@ public class NBARepo : BaseRepo, INBARepo
     /// <returns>A task that represents the asynchronous update operation. The task result contains a boolean indicating whether the update was successful.</returns>
     public async Task<bool> UpdateNBARoster(NBARoster roster, ILogger<NBARoster> logger)
     {
-        try
-        {
-            if (!await _existenceService.ExistsAsync<NBARoster>(roster.playerID, base.connectionString))
-            {
-                logger.LogWarning($"NBA Roster with PlayerID {roster.playerID} not found.");
-                return false;
-            }
-            using (var connection = new SqlConnection(base.connectionString))
-            {
-                await base.GenToken(connection);
-                // Use reflection to update properties that are not null (Sparse update)
-                var existingRoster = await connection.GetAsync<NBARoster>(roster.playerID);
-                var properties = typeof(NBARoster).GetProperties();
-                foreach (var property in properties)
-                {
-                    var newValue = property.GetValue(roster);
-                    if (newValue != null)
-                    {
-                        property.SetValue(existingRoster, newValue);
-                        Console.WriteLine("NBA Updating " + property.Name);
-                    }
-                    else
-                    {
-                        Console.WriteLine("NBA Not updating Null " + property.Name);
-                    }
-                }
-                await connection.UpdateAsync(existingRoster);
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error updating NBA Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NBA roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     /// <summary>
@@ -123,28 +84,9 @@ public class NBARepo : BaseRepo, INBARepo
     /// <returns>A task that represents the asynchronous delete operation. The task result contains a boolean indicating whether the delete was successful.</returns>
     public async Task<bool> DeleteNBARoster(int playerId, ILogger<NBARoster> logger)
     {
-        try
-        {
-            using var connection = new SqlConnection(base.connectionString);
-            await base.GenToken(connection);
-            var roster = await connection.GetAsync<NBARoster>(playerId);
-            if (roster != null)
-            {
-                await connection.DeleteAsync(roster);
-            }
-            else
-            {
-                logger.LogError($"Unable to Delete: NBA Roster playerId {playerId} not found");
-                return false;
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error deleting NBA Roster: " + ex.Message);
-            return false;
-        }
+        logger.LogError("Legacy NBA roster write endpoints are not supported on DB V2. Use /api/v2/players.");
+        await Task.CompletedTask;
+        return false;
     }
 
     #endregion

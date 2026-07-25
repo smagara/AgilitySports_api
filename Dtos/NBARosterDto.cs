@@ -4,13 +4,17 @@ public class NBARosterDto
 {
 
     public int playerID { get; set; }
+    public string? TeamCode { get; set; }
+    public string? Team { get; set; }
+    public string? TeamName { get; set; }
+    public string League { get; set; } = null!;
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public string? Team { get; set; }
     public string? Number { get; set; }
     public string? Position { get; set; }
     public string? Height { get; set; }
     public string? Weight { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? College { get; set; }
+    public short? YearDrafted { get; set; }
 }

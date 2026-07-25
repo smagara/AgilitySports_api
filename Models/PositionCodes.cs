@@ -2,7 +2,7 @@ using Dapper.Contrib.Extensions;
 
 namespace AgilitySportsAPI.Models;
 
-[Table("dbo.PositionCodes")]
+[Table("reference.PositionCodes")]
 public record PositionCodes
 {
     [Key] public required string Sport { get; set; }

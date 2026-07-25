@@ -1,7 +1,7 @@
 // This file contains the endpoints for static data operations such as fetching position codes.
 
 using AgilitySportsAPI.Data;
-using AgilitySportsAPI.Models;
+using AgilitySportsAPI.Dtos;
 
 public static class StaticDataEndpoints
 {
@@ -11,18 +11,46 @@ public static class StaticDataEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapStaticDataEndpoints(this IEndpointRouteBuilder routes)
     {
-        var staticData = routes.MapGroup("api/staticdata");
-        staticData.MapGet("positions", async (ILogger<PositionCodes> logger, IStaticData repoPosition, string sport) =>
+        void MapStaticDataRoutes(RouteGroupBuilder staticData)
         {
-            var results = await repoPosition.GetPositionCodes(logger, sport);
-            if (results != null)
+            staticData.MapGet("positions", async (
+                ILogger<PositionCodesDTO> logger,
+                IStaticData repoPosition,
+                string? sport,
+                string? sportCode) =>
             {
-                return Results.Ok(results);
-            }
-            else
+                var requestedSport = !string.IsNullOrWhiteSpace(sportCode) ? sportCode : sport;
+                var results = await repoPosition.GetPositionCodes(logger, requestedSport);
+                if (results != null)
+                {
+                    return Results.Ok(results);
+                }
+                else
+                {
+                    return Results.Problem("Error fetching sport Positions for " + requestedSport + ", ask your admin to check the logs.");
+                }
+            });
+
+            staticData.MapGet("teams", async (
+                ILogger<TeamLeagueDto> logger,
+                IStaticData repoPosition,
+                string? sport,
+                string? sportCode) =>
             {
-                return Results.Problem("Error fetching sport Positions for " + sport + ", ask your admin to check the logs.");
-            }
-        });
+                var requestedSport = !string.IsNullOrWhiteSpace(sportCode) ? sportCode : sport;
+                var results = await repoPosition.GetTeamLeagues(logger, requestedSport);
+                if (results != null)
+                {
+                    return Results.Ok(results);
+                }
+                else
+                {
+                    return Results.Problem("Error fetching teams for " + requestedSport + ", ask your admin to check the logs.");
+                }
+            });
+        }
+
+        MapStaticDataRoutes(routes.MapGroup("api/staticdata"));
+        MapStaticDataRoutes(routes.MapGroup("api/v2/staticdata"));
     }
 }

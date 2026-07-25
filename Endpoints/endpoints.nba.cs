@@ -1,6 +1,7 @@
 // This file contains the endpoints for NBA-related operations such as CRUD operations on the NBA roster.
 
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Dtos;
 using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Services;
 
@@ -12,123 +13,183 @@ public static class NbaEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapNbaEndpoints(this IEndpointRouteBuilder routes)
     {
-        var NBA = routes.MapGroup("api/nba");
-
-        NBA.MapGet("roster", async (ILogger<NBARoster> logger, int? playerId, INBARepo repo) =>
+        void MapNbaRoutes(RouteGroupBuilder nba)
         {
-            var results = await repo.GetNBARoster(logger, playerId);
-            if (results != null)
+            nba.MapGet("roster", async (ILogger<NBARoster> logger, int? playerId, INBARepo repo) =>
             {
-                return Results.Ok(results);
-            }
-            else
-            {
-                return Results.Problem("Error fetching NBA Roster, ask your admin to check the logs.");
-            }
-        });
+                var results = await repo.GetNBARoster(logger, playerId);
+                if (results != null)
+                {
+                    return Results.Ok(results);
+                }
+                else
+                {
+                    return Results.Problem("Error fetching NBA Roster, ask your admin to check the logs.");
+                }
+            });
 
-        NBA.MapPost("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
+            nba.MapPost("roster", async (ILogger<NBARoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
+            {
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+
+                if (!isValid)
+                { 
+                    logger.LogWarning("XSS attempt blocked in NBA roster creation. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
+
+                // Validate structured fields (height, weight, age, position, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
+                { 
+                    logger.LogWarning("Validation errors in NBA roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
+
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NBA",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = sanitizedRoster.FirstName,
+                    LastName = sanitizedRoster.LastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    College = sanitizedRoster.College
+                };
+
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
+
+                var createdId = await writeService.CreatePlayer(logger, player);
+
+                if (createdId != null)
+                { 
+                    return Results.Ok("Added to NBA Roster.");
+                }
+                else
+                { 
+                    return Results.Problem("Error adding to NBA Roster, check the logs.");
+                }
+            });
+
+            nba.MapPut("roster", async (ILogger<NBARoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
+            {
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+
+                if (!isValid)
+                {
+                    logger.LogWarning("XSS attempt blocked in NBA roster update. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
+
+                // Validate structured fields (height, weight, age, position, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
+                {
+                    logger.LogWarning("Validation errors in NBA roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
+
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NBA",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = sanitizedRoster.FirstName,
+                    LastName = sanitizedRoster.LastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    College = sanitizedRoster.College
+                };
+
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
+
+                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.playerID, player);
+
+                if (updated)
+                {
+                    return Results.Ok("Updated NBA Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NBA player was not found or update failed.");
+                }
+            });
+
+            nba.MapDelete("roster", async (ILogger<NBARoster> logger, IPlayersV2WriteService writeService, int playerId) =>
+            {
+                var deleted = await writeService.DeletePlayer(logger, playerId);
+
+                if (deleted)
+                {
+                    return Results.Ok("Deleted from NBA Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NBA player was not found or delete failed.");
+                }
+            });
+        }
+
+        MapNbaRoutes(routes.MapGroup("api/nba"));
+        MapNbaRoutes(routes.MapGroup("api/v2/nba"));
+    }
+
+    private static int? ParseNullableInt(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
         {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
-            {
-                logger.LogWarning("XSS attempt blocked in NBA roster creation. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
-                { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
+            return null;
+        }
 
-            // Validate structured fields (height, weight, age, position, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NBA roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
-                { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
-
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-
-            NBARoster? newPlayer = await repo.CreateNBARoster(sanitizedRoster, logger);
-
-            if (newPlayer != null)
-            {
-                return Results.Ok("Added to NBA Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error adding to NBA Roster, check the logs.");
-            }
-        });
-
-        NBA.MapPut("roster", async (ILogger<NBARoster> logger, INBARepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NBARoster roster) =>
-        {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
-            {
-                logger.LogWarning("XSS attempt blocked in NBA roster update. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
-                { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
-
-            // Validate structured fields (height, weight, age, position, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NBA roster update. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
-                { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
-
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-
-            bool ret = await repo.UpdateNBARoster(sanitizedRoster, logger);
-
-            if (ret == true)
-            {
-                return Results.Ok("Updated NBA Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error updating the NBA Roster, check the logs.");
-            }
-        });
-
-        NBA.MapDelete("roster", async (ILogger<NBARoster> logger, INBARepo repo, int playerId) =>
-        {
-            bool ret = await repo.DeleteNBARoster(playerId, logger);
-
-            if (ret == true)
-            {
-                return Results.Ok("Deleted from NBA Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error deleting from NBA Roster, check the logs.");
-            }
-        });
+        return int.TryParse(value.Trim(), out var parsed) ? parsed : null;
     }
 }

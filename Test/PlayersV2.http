@@ -1,0 +1,60 @@
+@url = http://localhost:1106/api/v2/players
+
+### list v2 players
+GET {{url}}
+
+### filter v2 players by sport and search
+GET {{url}}?sportCode=NBA&search=James
+
+### get v2 player by id
+GET {{url}}/3001
+
+### create v2 player
+POST {{url}}
+Content-Type: application/json
+
+{
+  "sportCode": "NBA",
+  "teamCode": "PHI",
+  "positionCode": "PG",
+  "firstName": "Test",
+  "lastName": "Player",
+  "dateOfBirth": "1998-03-15",
+  "height": "6'3\"",
+  "weight": 195,
+  "number": 17,
+  "college": "Temple",
+  "birthplace": "Philadelphia, PA",
+  "draftYear": 2020,
+  "seasonYear": 2026
+}
+
+### update v2 player
+PUT {{url}}/3001
+Content-Type: application/json
+
+{
+  "sportCode": "NBA",
+  "teamCode": "PHI",
+  "positionCode": "SG",
+  "firstName": "Test",
+  "lastName": "Player Updated",
+  "number": 21,
+  "seasonYear": 2026
+}
+
+### get v2 player stats
+GET {{url}}/3001/stats
+
+### upsert v2 player stats
+PUT {{url}}/3001/stats
+Content-Type: application/json
+
+{
+  "pointsPerGame": 18.4,
+  "reboundsPerGame": 4.2,
+  "assistsPerGame": 7.6
+}
+
+### delete v2 player
+DELETE {{url}}/3001

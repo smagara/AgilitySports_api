@@ -186,7 +186,9 @@ public class InputValidationService : IInputValidationService
             // NFL
             "C", "CB", "DB", "DE", "DL", "DT", "FB", "G", "ILB", "K", "LB", "LS", "NT", "OL", "OLB", "OT", "P", "QB", "RB", "S", "TE", "WR",
             // NHL
-            "C", "D", "F", "G", "LW", "RW"
+            "C", "D", "F", "G", "LW", "RW",
+            // MLB
+            "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS"
         };
 
         var cleanInput = input.Trim().ToUpper();
@@ -212,12 +214,14 @@ public class InputValidationService : IInputValidationService
             "NBA" => new[] { "C", "F", "G", "PF", "PG", "SF", "SG" },
             "NFL" => new[] { "C", "CB", "DB", "DE", "DL", "DT", "FB", "G", "ILB", "K", "LB", "LS", "NT", "OL", "OLB", "OT", "P", "QB", "RB", "S", "TE", "WR" },
             "NHL" => new[] { "C", "D", "F", "G", "LW", "RW" },
+            "MLB" => new[] { "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS" },
+
             _ => new string[0] // Unknown sport
         };
 
         if (validPositions.Length == 0)
         {
-            return (false, $"Unknown sport '{sport}'. Valid sports: NBA, NFL, NHL");
+            return (false, $"Unknown sport '{sport}'. Valid sports: NBA, NFL, NHL, MLB, FIF");
         }
 
         if (!validPositions.Contains(cleanInput))

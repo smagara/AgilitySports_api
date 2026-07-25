@@ -1,6 +1,7 @@
 // This file contains the endpoints for NFL-related operations such as fetching the NFL roster.
 
 using AgilitySportsAPI.Data;
+using AgilitySportsAPI.Dtos;
 using AgilitySportsAPI.Models;
 using AgilitySportsAPI.Services;
 
@@ -12,127 +13,177 @@ public static class NflEndpoints
     /// <param name="routes">The endpoint route builder.</param>
     public static void MapNflEndpoints(this IEndpointRouteBuilder routes)
     {
-        var NFL = routes.MapGroup("api/nfl");
-        
-        // Read
-        NFL.MapGet("roster", async (ILogger<NFLRoster> logger, int? playerId, INFLRepo repo) =>
+        void MapNflRoutes(RouteGroupBuilder nfl)
         {
-            var results = await repo.GetNFLRoster(logger, playerId);
-            if (results != null)
+            // Read
+            nfl.MapGet("roster", async (ILogger<NFLRoster> logger, int? playerId, INFLRepo repo) =>
             {
-                return Results.Ok(results);
-            }
-            else
-            {
-                return Results.Problem("Error fetching NFL Roster, ask your admin to check the logs.");
-            }
-        });
+                var results = await repo.GetNFLRoster(logger, playerId);
+                if (results != null)
+                {
+                    return Results.Ok(results);
+                }
+                else
+                {
+                    return Results.Problem("Error fetching NFL Roster, ask your admin to check the logs.");
+                }
+            });
 
-        // Create
-        NFL.MapPost("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator,  NFLRoster roster) =>
-        {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
+            // Create
+            nfl.MapPost("roster", async (ILogger<NFLRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NFLRoster roster) =>
             {
-                logger.LogWarning("XSS attempt blocked in NFL roster creation. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
+
+                if (!isValid)
                 { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
+                    logger.LogWarning("XSS attempt blocked in NFL roster creation. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
 
-            // Validate structured fields (height, weight, age, position, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NFL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
+                // Validate structured fields (height, weight, age, position, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
                 { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
+                    logger.LogWarning("Validation errors in NFL roster creation. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
 
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
 
-            NFLRoster? newPlayer = await repo.Create(sanitizedRoster, logger);
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NFL",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = sanitizedRoster.FirstName,
+                    LastName = sanitizedRoster.LastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = sanitizedRoster.Weight,
+                    Number = sanitizedRoster.Number,
+                    College = sanitizedRoster.College
+                };
 
-            if (newPlayer != null)
-            {
-                return Results.Ok("Added to NFL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error adding to NFL Roster, check the logs.");
-            }
-        });
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
 
-        // Update
-        NFL.MapPut("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NFLRoster roster) =>
-        {
-            // Validate for XSS patterns
-            var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
-            
-            if (!isValid)
-            {
-                logger.LogWarning("XSS attempt blocked in NFL roster update. Violations: {Violations}", string.Join(", ", violations));
-                return Results.BadRequest(new 
+                var createdId = await writeService.CreatePlayer(logger, player);
+
+                if (createdId != null)
                 { 
-                    Error = "XSS attempt detected", 
-                    Message = "The request contains potentially malicious content and has been blocked for security reasons.",
-                    Details = violations
-                });
-            }
-
-            // Validate structured fields (height, weight, age, position, etc.)
-            var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
-            
-            if (!isValidStructured)
-            {
-                logger.LogWarning("Validation errors in NFL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
-                return Results.BadRequest(new 
+                    return Results.Ok("Added to NFL Roster.");
+                }
+                else
                 { 
-                    Error = "Validation failed", 
-                    Message = "The request contains invalid data for structured fields.",
-                    Details = validationErrors
-                });
-            }
+                    return Results.Problem("Error adding to NFL Roster, check the logs.");
+                }
+            });
 
-            // Sanitize input after all validation passes
-            var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-
-            bool ret = await repo.Update(sanitizedRoster, logger);
-
-            if (ret == true)
+            // Update
+            nfl.MapPut("roster", async (ILogger<NFLRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, NFLRoster roster) =>
             {
-                return Results.Ok("Updated NFL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error updating the NFL Roster, check the logs.");
-            }
-        });
+                // Validate for XSS patterns
+                var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
 
-        // Delete
-        NFL.MapDelete("roster", async (ILogger<NFLRoster> logger, INFLRepo repo, int playerId) =>
-        {
-            bool ret = await repo.Delete(playerId, logger);
+                if (!isValid)
+                {
+                    logger.LogWarning("XSS attempt blocked in NFL roster update. Violations: {Violations}", string.Join(", ", violations));
+                    return Results.BadRequest(new
+                    {
+                        Error = "XSS attempt detected",
+                        Message = "The request contains potentially malicious content and has been blocked for security reasons.",
+                        Details = violations
+                    });
+                }
 
-            if (ret == true)
+                // Validate structured fields (height, weight, age, position, etc.)
+                var (isValidStructured, validationErrors) = validator.ValidateModel(roster, logger);
+
+                if (!isValidStructured)
+                {
+                    logger.LogWarning("Validation errors in NFL roster update. Errors: {Errors}", string.Join(", ", validationErrors));
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "The request contains invalid data for structured fields.",
+                        Details = validationErrors
+                    });
+                }
+
+                // Sanitize input after all validation passes
+                var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
+
+                var player = new PlayerUpsertDto
+                {
+                    SportCode = "NFL",
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
+                    FirstName = sanitizedRoster.FirstName,
+                    LastName = sanitizedRoster.LastName,
+                    DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = sanitizedRoster.Weight,
+                    Number = sanitizedRoster.Number,
+                    College = sanitizedRoster.College
+                };
+
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
+                }
+
+                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
+
+                if (updated)
+                {
+                    return Results.Ok("Updated NFL Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NFL player was not found or update failed.");
+                }
+            });
+
+            // Delete
+            nfl.MapDelete("roster", async (ILogger<NFLRoster> logger, IPlayersV2WriteService writeService, int playerId) =>
             {
-                return Results.Ok("Deleted from NFL Roster.");
-            }
-            else
-            {
-                return Results.Problem("Error deleting from NFL Roster, check the logs.");
-            }
-        });
+                var deleted = await writeService.DeletePlayer(logger, playerId);
+
+                if (deleted)
+                {
+                    return Results.Ok("Deleted from NFL Roster.");
+                }
+                else
+                {
+                    return Results.NotFound("NFL player was not found or delete failed.");
+                }
+            });
+        }
+
+        MapNflRoutes(routes.MapGroup("api/nfl"));
+        MapNflRoutes(routes.MapGroup("api/v2/nfl"));
     }
 }

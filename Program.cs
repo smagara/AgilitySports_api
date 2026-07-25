@@ -26,6 +26,9 @@ builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
 builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
+builder.Services.AddScoped<IPlayersRepo, PlayersRepo>();
+builder.Services.AddScoped<IPlayersV2WriteService, PlayersV2WriteService>();
+builder.Services.AddScoped<ILegacyRosterWriteService, LegacyRosterWriteService>();
 builder.Services.AddScoped<IStaticData, StaticData>();
 builder.Services.AddScoped<IXssValidationService, XssValidationService>();
 builder.Services.AddScoped<IInputSanitizationService, InputSanitizationService>();
@@ -60,8 +63,7 @@ app.MapNflEndpoints();
 app.MapMlbEndpoints();
 app.MapNhlEndpoints();
 app.MapStaticDataEndpoints();
+app.MapPlayersV2Endpoints();
 // Add database health endpoint
 AgilitySportsAPI.Endpoints.HealthCheckExtensions.MapDatabaseHealthEndpoint(app, app.Configuration);
 app.Run();
-
-
