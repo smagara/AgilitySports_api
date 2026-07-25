@@ -74,7 +74,11 @@ public static class NflEndpoints
                     Height = sanitizedRoster.Height,
                     Weight = sanitizedRoster.Weight,
                     Number = sanitizedRoster.Number,
-                    College = sanitizedRoster.College
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))
@@ -143,7 +147,11 @@ public static class NflEndpoints
                     Height = sanitizedRoster.Height,
                     Weight = sanitizedRoster.Weight,
                     Number = sanitizedRoster.Number,
-                    College = sanitizedRoster.College
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))

@@ -2,7 +2,7 @@ namespace AgilitySportsAPI.Dtos;
 
 public class PlayerSummaryDto
 {
-    public int PlayerID { get; set; }
+    public int PlayerId { get; set; }
     public string SportCode { get; set; } = null!;
     public string TeamCode { get; set; } = null!;
     public string? TeamName { get; set; }

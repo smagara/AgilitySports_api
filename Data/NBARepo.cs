@@ -17,7 +17,7 @@ public class NBARepo : BaseRepo, INBARepo
             logger.LogInformation("Fetching NBA Roster");
 
             var sql = @"
-            select p.playerID
+            select p.playerID as PlayerId
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
                 ,p.teamCode as TeamCode
@@ -30,7 +30,10 @@ public class NBARepo : BaseRepo, INBARepo
                 ,convert(varchar(10), p.weight) as Weight
                 ,p.dateOfBirth as DateOfBirth
                 ,p.college as College
-                ,p.draftYear as YearDrafted
+                ,p.birthCityState as BirthCityState
+                ,p.birthCountry as BirthCountry
+                ,p.draftYear as DraftYear
+                ,p.seasonYear as SeasonYear
             from core.Players p
             left join core.Teams t
                 on t.sportCode = p.sportCode

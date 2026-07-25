@@ -5,15 +5,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 999,
+  "playerId": 999,
   "name": "  John   Doe  ",
   "team": "Bruins & Co.",
   "number": "13",
   "position": "LF",
   "handed": "L",
   "age": 33,
-  "drafted": 0,
-  "birthPlace": "Toronto, ON",
+  "draftYear": 2000,
+  "birthCityState": "Toronto, ON",
   "birthCountry": "Canada"
 }
 
@@ -38,7 +38,7 @@ POST {{url}}nfl/roster
 Content-Type: application/json
 
 {
-    "PlayerId": 0,
+  "playerId": 0,
     "FirstName": "JohnU0000Doe",
     "LastName": "Smith",
     "Team": "NYG",
@@ -76,15 +76,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1000,
+  "playerId": 1000,
   "name": "This is a very long name that should be truncated because it exceeds the maximum length allowed for strict field validation",
   "team": "Bruins",
   "number": "99",
   "position": "C",
   "handed": "R",
   "age": 25,
-  "drafted": 1,
-  "birthPlace": "Boston",
+  "draftYear": 2001,
+  "birthCityState": "Boston",
   "birthCountry": "USA"
 }
 
@@ -221,7 +221,7 @@ POST {{url}}nfl/roster
 Content-Type: application/json
 
 {
-  "PlayerId": 0,
+  "playerId": 0,
   "FirstName": "Tom",
   "LastName": "Brady",
   "Team": "TB",
@@ -243,15 +243,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1001,
+  "playerId": 1001,
   "name": "Connor McDavid",
   "team": "Oilers",
   "number": "97",
   "position": "C",
   "handed": "L",
   "age": 26,
-  "drafted": 1,
-  "birthPlace": "Richmond Hill",
+  "draftYear": 2015,
+  "birthCityState": "Richmond Hill",
   "birthCountry": "Canada"
 }
 
@@ -276,15 +276,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1002,
+  "playerId": 1002,
   "name": "Sidney Crosby",
   "team": "Penguins",
   "number": "87",
   "position": "C",
   "handed": "L",
   "age": 36,
-  "drafted": 1,
-  "birthPlace": "Halifax",
+  "draftYear": 2005,
+  "birthCityState": "Halifax",
   "birthCountry": "Canada"
 }
 
@@ -293,15 +293,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1003,
+  "playerId": 1003,
   "name": "Alexander Ovechkin",
   "team": "Capitals",
   "number": "8",
   "position": "LW",
   "handed": "R",
   "age": 38,
-  "drafted": 1,
-  "birthPlace": "Moscow",
+  "draftYear": 2004,
+  "birthCityState": "Moscow",
   "birthCountry": "Russia"
 }
 
@@ -310,15 +310,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1004,
+  "playerId": 1004,
   "name": "Ambidextrous Player",
   "team": "Bruins",
   "number": "99",
   "position": "C",
   "handed": "B",
   "age": 25,
-  "drafted": 1,
-  "birthPlace": "Boston",
+  "draftYear": 2019,
+  "birthCityState": "Boston",
   "birthCountry": "USA"
 }
 
@@ -327,15 +327,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 1005,
+  "playerId": 1005,
   "name": "Invalid Player",
   "team": "Bruins",
   "number": "88",
   "position": "D",
   "handed": "X",
   "age": 28,
-  "drafted": 1,
-  "birthPlace": "Toronto",
+  "draftYear": 2016,
+  "birthCityState": "Toronto",
   "birthCountry": "Canada"
 }
 

@@ -72,7 +72,11 @@ public static class NbaEndpoints
                     Height = sanitizedRoster.Height,
                     Weight = ParseNullableInt(sanitizedRoster.Weight),
                     Number = ParseNullableInt(sanitizedRoster.Number),
-                    College = sanitizedRoster.College
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))
@@ -140,7 +144,11 @@ public static class NbaEndpoints
                     Height = sanitizedRoster.Height,
                     Weight = ParseNullableInt(sanitizedRoster.Weight),
                     Number = ParseNullableInt(sanitizedRoster.Number),
-                    College = sanitizedRoster.College
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))
@@ -152,7 +160,7 @@ public static class NbaEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.playerID, player);
+                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
 
                 if (updated)
                 {

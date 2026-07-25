@@ -6,7 +6,7 @@ namespace AgilitySportsAPI.Models;
 public record MLBRoster
 {
     [Key]
-    public string? PlayerID { get; set; }
+    public string? PlayerId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? TeamCode { get; set; }
@@ -19,7 +19,10 @@ public record MLBRoster
     public string? Height { get; set; }    
     public string? Weight { get; set; }
     public DateTime DateOfBirth { get; set; }
+    public string? College { get; set; }
     public string? BirthCountry { get; set; }
-    public string? BirthPlace { get; set; }
+    public string? BirthCityState { get; set; }
+    public short? DraftYear { get; set; }
+    public short? SeasonYear { get; set; }
 
 }

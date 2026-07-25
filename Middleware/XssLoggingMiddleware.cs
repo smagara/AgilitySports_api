@@ -6,29 +6,33 @@ public class XssLoggingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<XssLoggingMiddleware> _logger;
+    private readonly bool _enableRequestLogging;
 
-    public XssLoggingMiddleware(RequestDelegate next, ILogger<XssLoggingMiddleware> logger)
+    public XssLoggingMiddleware(RequestDelegate next, ILogger<XssLoggingMiddleware> logger, IConfiguration configuration)
     {
         _next = next;
         _logger = logger;
+        _enableRequestLogging = configuration.GetValue<bool>("XssLogging:EnableRequestLogging", false);
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Log the request details for potential XSS attempts
-        var requestInfo = new
+        if (_enableRequestLogging)
         {
-            Timestamp = DateTime.UtcNow,
-            IPAddress = context.Connection.RemoteIpAddress?.ToString(),
-            UserAgent = context.Request.Headers["User-Agent"].ToString(),
-            Method = context.Request.Method,
-            Path = context.Request.Path,
-            QueryString = context.Request.QueryString.ToString(),
-            Headers = context.Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString())
-        };
+            // Log request metadata when explicitly enabled for diagnostics.
+            var requestInfo = new
+            {
+                Timestamp = DateTime.UtcNow,
+                IPAddress = context.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = context.Request.Headers["User-Agent"].ToString(),
+                Method = context.Request.Method,
+                Path = context.Request.Path,
+                QueryString = context.Request.QueryString.ToString(),
+                Headers = context.Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString())
+            };
 
-        // Log all requests for monitoring (you might want to adjust the log level)
-        _logger.LogInformation("Request received: {RequestInfo}", requestInfo);
+            _logger.LogInformation("Request received: {RequestInfo}", requestInfo);
+        }
 
         await _next(context);
     }

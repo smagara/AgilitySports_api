@@ -48,7 +48,6 @@ public class InputSanitizationService : IInputSanitizationService
             // Numbers and codes - strict
             { "Number", SanitizationLevel.Strict },
             { "PlayerId", SanitizationLevel.Strict },
-            { "playerID", SanitizationLevel.Strict },
             
             // Physical attributes - minimal to preserve legitimate punctuation
             { "Height", SanitizationLevel.None },
@@ -61,7 +60,7 @@ public class InputSanitizationService : IInputSanitizationService
             
             // Location fields - moderate
             { "College", SanitizationLevel.Moderate },
-            { "BirthPlace", SanitizationLevel.Moderate },
+            { "BirthCityState", SanitizationLevel.Moderate },
             { "BirthCountry", SanitizationLevel.Moderate },
             
             // Dates - strict
@@ -70,7 +69,8 @@ public class InputSanitizationService : IInputSanitizationService
             
             // Handedness - strict
             { "Handed", SanitizationLevel.Strict },
-            { "Drafted", SanitizationLevel.Strict }
+            { "DraftYear", SanitizationLevel.Strict },
+            { "SeasonYear", SanitizationLevel.Strict }
         };
     }
 

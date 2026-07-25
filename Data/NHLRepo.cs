@@ -34,12 +34,12 @@ public class NHLRepo : BaseRepo, INHLRepo
                         ,p.dateOfBirth as DateOfBirth
                         ,nhl.handed as Handed
                         ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
-                        ,p.draftYear as Drafted
-                        ,p.draftYear as YearDrafted
+                        ,p.draftYear as DraftYear
+                        ,p.seasonYear as SeasonYear
                         ,p.college as College
-                        ,p.birthCityState as BirthPlace
+                        ,p.birthCityState as BirthCityState
                         ,p.birthCountry as BirthCountry
-                        ,p.playerID
+                        ,p.playerID as PlayerId
                     from core.Players p
                     left join core.Teams t
                         on t.sportCode = p.sportCode

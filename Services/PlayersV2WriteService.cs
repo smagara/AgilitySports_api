@@ -53,7 +53,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
         catch (Exception ex)
         {
-            logger.LogError("Error creating V2 player: " + ex.Message);
+            logger.LogError(ex, "Error creating V2 player: " + ex.Message);
             transaction.Rollback();
             return null;
         }
@@ -89,7 +89,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
         catch (Exception ex)
         {
-            logger.LogError("Error updating V2 player {PlayerId}: " + ex.Message, playerId);
+            logger.LogError(ex, "Error updating V2 player {PlayerId}: " + ex.Message, playerId);
             transaction.Rollback();
             return false;
         }
@@ -123,7 +123,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
         catch (Exception ex)
         {
-            logger.LogError("Error deleting V2 player {PlayerId}: " + ex.Message, playerId);
+            logger.LogError(ex, "Error deleting V2 player {PlayerId}: " + ex.Message, playerId);
             transaction.Rollback();
             return false;
         }
@@ -156,7 +156,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
         catch (Exception ex)
         {
-            logger.LogError("Error upserting V2 player stats for PlayerId {PlayerId}: " + ex.Message, playerId);
+            logger.LogError(ex, "Error upserting V2 player stats for PlayerId {PlayerId}: " + ex.Message, playerId);
             transaction.Rollback();
             return false;
         }

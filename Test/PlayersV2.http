@@ -24,7 +24,7 @@ Content-Type: application/json
   "weight": 195,
   "number": 17,
   "college": "Temple",
-  "birthplace": "Philadelphia, PA",
+  "birthCityState": "Philadelphia, PA",
   "draftYear": 2020,
   "seasonYear": 2026
 }

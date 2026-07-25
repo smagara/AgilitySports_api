@@ -63,18 +63,23 @@ public static class NhlEndpoints
                 // Sanitize input after all validation passes
                 var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
 
-                var (firstName, lastName) = SplitName(sanitizedRoster.Name);
+                var (nameFirst, nameLast) = SplitName(sanitizedRoster.Name);
                 var player = new PlayerUpsertDto
                 {
                     SportCode = "NHL",
                     TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
                     PositionCode = sanitizedRoster.Position?.Trim(),
-                    FirstName = firstName,
-                    LastName = lastName,
+                    FirstName = sanitizedRoster.FirstName ?? nameFirst,
+                    LastName = sanitizedRoster.LastName ?? nameLast,
                     DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
                     Number = ParseNullableInt(sanitizedRoster.Number),
-                    Birthplace = sanitizedRoster.BirthPlace,
-                    DraftYear = sanitizedRoster.Drafted
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))
@@ -140,18 +145,23 @@ public static class NhlEndpoints
                 // Sanitize input after all validation passes
                 var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
 
-                var (firstName, lastName) = SplitName(sanitizedRoster.Name);
+                var (nameFirst, nameLast) = SplitName(sanitizedRoster.Name);
                 var player = new PlayerUpsertDto
                 {
                     SportCode = "NHL",
                     TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.Team?.Trim() ?? string.Empty,
                     PositionCode = sanitizedRoster.Position?.Trim(),
-                    FirstName = firstName,
-                    LastName = lastName,
+                    FirstName = sanitizedRoster.FirstName ?? nameFirst,
+                    LastName = sanitizedRoster.LastName ?? nameLast,
                     DateOfBirth = sanitizedRoster.DateOfBirth,
+                    Height = sanitizedRoster.Height,
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
                     Number = ParseNullableInt(sanitizedRoster.Number),
-                    Birthplace = sanitizedRoster.BirthPlace,
-                    DraftYear = sanitizedRoster.Drafted
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
                 };
 
                 if (string.IsNullOrWhiteSpace(player.TeamCode))
@@ -163,13 +173,13 @@ public static class NhlEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.playerID, player);
+                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
 
                 if (updated)
                 {
                     if (!string.IsNullOrWhiteSpace(sanitizedRoster.Handed))
                     {
-                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.playerID, new PlayerStatsUpsertDto
+                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
                         {
                             Handed = sanitizedRoster.Handed
                         });

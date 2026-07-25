@@ -32,8 +32,11 @@ public class NFLRepo : BaseRepo, INFLRepo
                         ,p.dateOfBirth as DateOfBirth
                         ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
                         ,p.college as College
-                        ,p.draftYear as YearDrafted
-                        ,p.playerId
+                        ,p.birthCityState as BirthCityState
+                        ,p.birthCountry as BirthCountry
+                        ,p.draftYear as DraftYear
+                        ,p.seasonYear as SeasonYear
+                        ,p.playerId as PlayerId
                     from core.Players p
                     left join core.Teams t
                         on t.sportCode = p.sportCode

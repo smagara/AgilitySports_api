@@ -3,7 +3,7 @@ namespace AgilitySportsAPI.Dtos;
 public class MLBRosterDto
 {
 
-    public string? playerID { get; set; }
+    public string? PlayerId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? TeamCode { get; set; }
@@ -17,6 +17,7 @@ public class MLBRosterDto
     public string? Weight { get; set; }
     public DateTime DateOfBirth { get; set; }
     public string? BirthCountry { get; set; }
-    public string? BirthPlace { get; set; }
-    public short? YearDrafted { get; set; }
+    public string? BirthCityState { get; set; }
+    public short? DraftYear { get; set; }
+    public short? SeasonYear { get; set; }
 }

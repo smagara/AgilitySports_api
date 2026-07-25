@@ -6,7 +6,7 @@ namespace AgilitySportsAPI.Models;
 public record NBARoster
 {
     [Key]
-     public int playerID { get; set; }
+    public int PlayerId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? TeamCode { get; set; }
@@ -19,4 +19,8 @@ public record NBARoster
     public DateTime? DateOfBirth { get; set; }
     public string? College { get; set; }
     public string? TeamName { get; set; }
+    public string? BirthCityState { get; set; }
+    public string? BirthCountry { get; set; }
+    public short? DraftYear { get; set; }
+    public short? SeasonYear { get; set; }
 }
