@@ -2,7 +2,7 @@ namespace AgilitySportsAPI.Dtos;
 
 public class NFLRosterDto
 {
-    public int playerID { get; set; }
+    public int PlayerId { get; set; }
     public string TeamCode { get; set; } = null!;
     public string Team { get; set; } = null!;
     public string TeamName { get; set; } = null!;
@@ -16,5 +16,8 @@ public class NFLRosterDto
     public DateTime? DateOfBirth { get; set; }
     public int? Age { get; set; }
     public string College { get; set; } = null!;
-    public short? YearDrafted { get; set; }
+    public string? BirthCityState { get; set; }
+    public string? BirthCountry { get; set; }
+    public short? DraftYear { get; set; }
+    public short? SeasonYear { get; set; }
 }

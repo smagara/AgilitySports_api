@@ -55,7 +55,7 @@ public static class MlbDataEndpoints
                 return Results.Ok(await repoBaseball.GetMLBDecades(logger, beginDecade ?? defaultDecadesBegin, endDecade ?? defaultDecadesEnd));
             });
 
-            mlb.MapPost("roster", async (ILogger<MLBRoster> logger, ILegacyRosterWriteService writeBridge, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, MLBRoster roster) =>
+            mlb.MapPost("roster", async (ILogger<MLBRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, MLBRoster roster) =>
             {
                 var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
                 if (!isValid)
@@ -82,37 +82,52 @@ public static class MlbDataEndpoints
                 }
 
                 var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-                var writeResult = await writeBridge.CreateAsync(logger, new LegacyPlayerWriteInput
+                var player = new PlayerUpsertDto
                 {
                     SportCode = "MLB",
-                    Team = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.TeamName ?? string.Empty,
-                    Position = sanitizedRoster.Position,
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.TeamName?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
                     FirstName = sanitizedRoster.FirstName,
                     LastName = sanitizedRoster.LastName,
                     DateOfBirth = sanitizedRoster.DateOfBirth,
                     Height = sanitizedRoster.Height,
-                    Weight = LegacyRosterWriteService.ParseNullableInt(sanitizedRoster.Weight),
-                    Number = LegacyRosterWriteService.ParseNullableInt(sanitizedRoster.Number),
-                    BirthPlace = sanitizedRoster.BirthPlace
-                }, new PlayerStatsUpsertDto
-                {
-                    Bats = sanitizedRoster.Bats,
-                    Throws = sanitizedRoster.Throws
-                });
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
+                };
 
-                if (writeResult.Succeeded)
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
                 {
-                    return Results.Ok("Added to MLB Roster.");
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
                 }
 
-                return Results.BadRequest(new
+                var createdId = await writeService.CreatePlayer(logger, player);
+                if (createdId == null)
                 {
-                    Error = "Write failed",
-                    Message = writeResult.Error ?? "Error adding to MLB Roster."
-                });
+                    return Results.Problem("Error adding to MLB Roster, check the logs.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats) || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws))
+                {
+                    await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
+                    {
+                        Bats = sanitizedRoster.Bats,
+                        Throws = sanitizedRoster.Throws
+                    });
+                }
+
+                return Results.Ok("Added to MLB Roster.");
             });
 
-            mlb.MapPut("roster", async (ILogger<MLBRoster> logger, ILegacyRosterWriteService writeBridge, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, MLBRoster roster) =>
+            mlb.MapPut("roster", async (ILogger<MLBRoster> logger, IPlayersV2WriteService writeService, IXssValidationService xssValidator, IInputSanitizationService sanitizer, IInputValidationService validator, MLBRoster roster) =>
             {
                 var (isValid, violations) = xssValidator.ValidateTextFields(roster, logger);
                 if (!isValid)
@@ -139,7 +154,7 @@ public static class MlbDataEndpoints
                 }
 
                 var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-                if (!int.TryParse(sanitizedRoster.PlayerID, out var playerId) || playerId <= 0)
+                if (!int.TryParse(sanitizedRoster.PlayerId, out var playerId) || playerId <= 0)
                 {
                     return Results.BadRequest(new
                     {
@@ -148,42 +163,52 @@ public static class MlbDataEndpoints
                     });
                 }
 
-                var writeResult = await writeBridge.UpdateAsync(logger, playerId, new LegacyPlayerWriteInput
+                var player = new PlayerUpsertDto
                 {
                     SportCode = "MLB",
-                    Team = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.TeamName ?? string.Empty,
-                    Position = sanitizedRoster.Position,
+                    TeamCode = sanitizedRoster.TeamCode?.Trim() ?? sanitizedRoster.TeamName?.Trim() ?? string.Empty,
+                    PositionCode = sanitizedRoster.Position?.Trim(),
                     FirstName = sanitizedRoster.FirstName,
                     LastName = sanitizedRoster.LastName,
                     DateOfBirth = sanitizedRoster.DateOfBirth,
                     Height = sanitizedRoster.Height,
-                    Weight = LegacyRosterWriteService.ParseNullableInt(sanitizedRoster.Weight),
-                    Number = LegacyRosterWriteService.ParseNullableInt(sanitizedRoster.Number),
-                    BirthPlace = sanitizedRoster.BirthPlace
-                }, new PlayerStatsUpsertDto
-                {
-                    Bats = sanitizedRoster.Bats,
-                    Throws = sanitizedRoster.Throws
-                });
+                    Weight = ParseNullableInt(sanitizedRoster.Weight),
+                    Number = ParseNullableInt(sanitizedRoster.Number),
+                    College = sanitizedRoster.College,
+                    BirthCityState = sanitizedRoster.BirthCityState,
+                    BirthCountry = sanitizedRoster.BirthCountry,
+                    DraftYear = sanitizedRoster.DraftYear,
+                    SeasonYear = sanitizedRoster.SeasonYear
+                };
 
-                if (writeResult.Succeeded)
+                if (string.IsNullOrWhiteSpace(player.TeamCode))
                 {
-                    return Results.Ok("Updated MLB Roster.");
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code is required."
+                    });
                 }
 
-                if (writeResult.NotFound)
+                var updated = await writeService.UpdatePlayer(logger, playerId, player);
+                if (!updated)
                 {
-                    return Results.NotFound(writeResult.Error ?? "MLB player was not found.");
+                    return Results.NotFound("MLB player was not found or update failed.");
                 }
 
-                return Results.BadRequest(new
+                if (!string.IsNullOrWhiteSpace(sanitizedRoster.Bats) || !string.IsNullOrWhiteSpace(sanitizedRoster.Throws))
                 {
-                    Error = "Write failed",
-                    Message = writeResult.Error ?? "Error updating MLB Roster."
-                });
+                    await writeService.UpsertPlayerStats(logger, playerId, new PlayerStatsUpsertDto
+                    {
+                        Bats = sanitizedRoster.Bats,
+                        Throws = sanitizedRoster.Throws
+                    });
+                }
+
+                return Results.Ok("Updated MLB Roster.");
             });
 
-            mlb.MapDelete("roster", async (ILogger<MLBRoster> logger, ILegacyRosterWriteService writeBridge, string playerId) =>
+            mlb.MapDelete("roster", async (ILogger<MLBRoster> logger, IPlayersV2WriteService writeService, string playerId) =>
             {
                 if (!int.TryParse(playerId, out var parsedPlayerId) || parsedPlayerId <= 0)
                 {
@@ -194,26 +219,27 @@ public static class MlbDataEndpoints
                     });
                 }
 
-                var writeResult = await writeBridge.DeleteAsync(logger, parsedPlayerId);
-                if (writeResult.Succeeded)
+                var deleted = await writeService.DeletePlayer(logger, parsedPlayerId);
+                if (deleted)
                 {
                     return Results.Ok("Deleted from MLB Roster.");
                 }
 
-                if (writeResult.NotFound)
-                {
-                    return Results.NotFound(writeResult.Error ?? "MLB player was not found.");
-                }
-
-                return Results.BadRequest(new
-                {
-                    Error = "Write failed",
-                    Message = writeResult.Error ?? "Error deleting from MLB Roster."
-                });
+                return Results.NotFound("MLB player was not found or delete failed.");
             });
         }
 
         MapMlbRoutes(routes.MapGroup("api/mlb"));
         MapMlbRoutes(routes.MapGroup("api/v2/mlb"));
+    }
+
+    private static int? ParseNullableInt(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return int.TryParse(value.Trim(), out var parsed) ? parsed : null;
     }
 }

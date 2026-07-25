@@ -53,7 +53,7 @@ POST {{url}}nfl/roster
 Content-Type: application/json
 
 {
-    "PlayerId": 0,
+  "playerId": 0,
     "FirstName": "<iframe src=javascript:alert('XSS')>",
     "LastName": "Doe",
     "Team": "NYG",
@@ -75,15 +75,15 @@ POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 999,
+  "playerId": 999,
   "name": "AB Grier",
   "team": "Bruins",
   "number": "13",
   "position": "LF",
   "handed": "L",
   "age": 33,
-  "drafted": 0,
-  "birthPlace": "%3Cscript%3Ealert('XSS')%3C/script%3E",
+  "draftYear": 2000,
+  "birthCityState": "%3Cscript%3Ealert('XSS')%3C/script%3E",
   "birthCountry": "Canada"
 }
 
@@ -92,7 +92,7 @@ PUT {{url}}nba/roster
 Content-Type: application/json
 
 {
-  "playerID": 280,
+  "playerId": 280,
   "FirstName": "<script>alert('XSS1')</script>",
   "LastName": "<img src=x onerror=alert('XSS2')>",
   "Team": "javascript:alert('XSS3')",

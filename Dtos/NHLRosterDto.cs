@@ -3,7 +3,7 @@ namespace AgilitySportsAPI.Dtos;
 public class NHLRosterDto
 {
 
-    public int playerID { get; set; }
+    public int PlayerId { get; set; }
     public string? Name { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
@@ -18,9 +18,9 @@ public class NHLRosterDto
     public DateTime? DateOfBirth { get; set; }
     public string? Handed { get; set; }
     public byte? Age { get; set; }
-    public Int16? Drafted { get; set; }
-    public Int16? YearDrafted { get; set; }
+    public short? DraftYear { get; set; }
+    public short? SeasonYear { get; set; }
     public string? College { get; set; }
-    public string? BirthPlace { get; set; }
+    public string? BirthCityState { get; set; }
     public string? BirthCountry { get; set; }
 }

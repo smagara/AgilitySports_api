@@ -1,63 +1,72 @@
 @url = http://localhost:1106/api/
 
 ### list players
-get http://localhost:1106/api/nhl/roster
+get {{url}}nhl/roster
 
 ## get player
 ### list players
-get http://localhost:1106/api/nhl/roster/?playerID=518
+get {{url}}nhl/roster/?playerId=518
 
 ### Delete NHL player
-DELETE http://localhost:1106/api/nhl/roster?playerId=518
+DELETE {{url}}nhl/roster?playerId=518
 
 ### Create new NHL player
-POST http://localhost:1106/api/nhl/roster
+POST {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 999,
-  "name": "AB Grier",
-  "team": "Bruins",
-  "number": "13",
-  "position": "LW",
-  "handed": "L",
-  "age": 33,
-  "drafted": 0,
-  "birthPlace": "Anywhere",
-  "birthCountry": "Canada"
+    "playerId": "0",
+    "teamCode": "WSH",
+    "firstName": "Fred",
+    "lastName": "Flintstone",
+    "position": "F",
+    "number": "74",
+    "height": "76",
+    "weight": "315",
+    "dateOfBirth": "2001-07-21T00:00:00",
+    "birthCityState": "Media, PA",
+    "birthCountry" : "United States",
+    "college": "Illinois",
+    "draftYear": 2021,
+    "seasonYear" : 2025
 }
 
 
 ### Update NHL player
-PUT http://localhost:1106/api/nhl/roster
+PUT {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 9,
-  "name": "JD Grier",
-  "team": "Bruins",
-  "number": "13",
-  "position": "LW",
-  "handed": "B",
-  "age": 33,
-  "drafted": 2011,
-  "birthPlace": "nowhere",
-  "birthCountry": "noplace"
+    "playerId": "9000019",
+    "teamCode": "WSH",
+    "firstName": "Barny",
+    "lastName": "Flintstone",
+    "position": "F",
+    "number": "74",
+    "height": "76",
+    "weight": "315",
+    "dateOfBirth": "2001-07-21T00:00:00",
+    "birthCityState": "Media, PA",
+    "birthCountry" : "United States",
+    "college": "Illinois",
+    "draftYear": 2020,
+    "seasonYear" : 2025
 }
 
 ### Attempt update to a player that doesn't exist
-PUT http://localhost:1106/api/nhl/roster
+PUT {{url}}nhl/roster
 Content-Type: application/json
 
 {
-  "playerID": 999901,
+  "playerId": 999901,
   "name": "JD Grier",
   "team": "Bruins",
   "number": "13",
   "position": "LW",
   "handed": "B",
   "age": 33,
-  "drafted": 2011,
-  "birthPlace": "nowhere",
+  "draftYear": 2011,
+  "seasonYear": 2025,
+  "birthCityState": "nowhere",
   "birthCountry": "noplace"
 }

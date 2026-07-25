@@ -31,7 +31,7 @@ public class PlayersRepo : IPlayersRepo
         {
             var sql = @"
                     select
-                        p.playerID as PlayerID
+                        p.playerID as PlayerId
                         ,p.sportCode as SportCode
                         ,p.teamCode as TeamCode
                         ,t.teamShortName as TeamName
@@ -84,7 +84,7 @@ public class PlayersRepo : IPlayersRepo
         {
             var sql = @"
                     select
-                        p.playerID as PlayerID
+                        p.playerID as PlayerId
                         ,p.sportCode as SportCode
                         ,p.teamCode as TeamCode
                         ,t.teamShortName as TeamName
@@ -120,7 +120,7 @@ public class PlayersRepo : IPlayersRepo
         {
             var sql = @"
                     select
-                        p.playerID as PlayerID
+                        p.playerID as PlayerId
                         ,p.sportCode as SportCode
                         ,mlb.bats as Bats
                         ,mlb.throws as Throws
@@ -181,6 +181,7 @@ public class PlayersRepo : IPlayersRepo
                     ,number
                     ,college
                     ,birthCityState
+                    ,birthCountry
                     ,draftYear
                     ,seasonYear
                 )
@@ -196,7 +197,8 @@ public class PlayersRepo : IPlayersRepo
                     ,@weight
                     ,@number
                     ,@college
-                    ,@birthplace
+                    ,@birthCityState
+                    ,@birthCountry
                     ,@draftYear
                     ,@seasonYear
                 );";
@@ -215,7 +217,8 @@ public class PlayersRepo : IPlayersRepo
                 weight = player.Weight,
                 number = player.Number,
                 college = player.College?.Trim(),
-                birthplace = player.Birthplace?.Trim(),
+                birthCityState = player.BirthCityState?.Trim(),
+                birthCountry = player.BirthCountry?.Trim(),
                 draftYear = player.DraftYear,
                 seasonYear = player.SeasonYear
             },
@@ -242,7 +245,8 @@ public class PlayersRepo : IPlayersRepo
                     ,weight = @weight
                     ,number = @number
                     ,college = @college
-                    ,birthCityState = @birthplace
+                    ,birthCityState = @birthCityState
+                    ,birthCountry = @birthCountry
                     ,draftYear = coalesce(@draftYear, draftYear)
                     ,seasonYear = coalesce(@seasonYear, seasonYear)
                 where playerID = @playerId;";
@@ -262,7 +266,8 @@ public class PlayersRepo : IPlayersRepo
                 weight = player.Weight,
                 number = player.Number,
                 college = player.College?.Trim(),
-                birthplace = player.Birthplace?.Trim(),
+                birthCityState = player.BirthCityState?.Trim(),
+                birthCountry = player.BirthCountry?.Trim(),
                 draftYear = player.DraftYear,
                 seasonYear = player.SeasonYear
             },

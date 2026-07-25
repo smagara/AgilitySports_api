@@ -4,16 +4,58 @@
 get {{url}}mlb/roster/all
 
 ### list players
-get http://localhost:1106/api/mlb/roster
+get {{url}}mlb/roster
 
 ### get all attendance
 get {{url}}mlb/attendance/all
 
 ### list attendance stats
-get http://localhost:1106/api/mlb/attendance
+get {{url}}mlb/attendance
 
 ### hydrate a PrimeNG chart with MLB Attendance
-get http://localhost:1106/api/mlb/chart?yearId=1984
+get {{url}}mlb/chart?yearId=1984
 
 ### hydrate a PrimeNG chart with MLB Attendance by decade
-get http://localhost:1106/api/mlb/decades?yearId=1980
+get {{url}}mlb/decades?yearId=1980
+
+### create new player
+post {{url}}mlb/roster
+Content-Type: application/json
+
+{
+    "playerId": "0",
+    "teamCode": "CIN",
+    "firstName": "Fred",
+    "lastName": "Flintstone",
+    "position": "C",
+    "number": "74",
+    "height": "76",
+    "weight": "215",
+    "dateOfBirth": "2001-07-21T00:00:00",
+    "birthCityState": "Springfield, PA",
+    "birthCountry" : "United States",
+    "college": "Penn",
+    "draftYear": 2021,
+    "seasonYear" : 2026
+}
+
+### update player by playerId
+put {{url}}mlb/roster/?playerId=9000012
+Content-Type: application/json
+
+{
+    "playerId": "9000012",
+    "teamCode": "CIN",
+    "firstName": "Isaiah",
+    "lastName": "Adams",
+    "position": "RP",
+    "number": "74",
+    "height": "76",
+    "weight": "315",
+    "dateOfBirth": "2001-07-21T00:00:00",
+    "birthCityState": "Media, PA",
+    "birthCountry" : "United States",
+    "college": "Illinois",
+    "draftYear": 2021,
+    "seasonYear" : 2025
+}
