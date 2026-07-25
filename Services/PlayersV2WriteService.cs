@@ -6,10 +6,23 @@ using System.Configuration;
 
 namespace AgilitySportsAPI.Services;
 
+public enum PlayerWriteOutcome
+{
+    Success,
+    NotFound,
+    InvalidTeam,
+    StatsFailed,
+    Error
+}
+
 public interface IPlayersV2WriteService
 {
     Task<int?> CreatePlayer(ILogger logger, PlayerUpsertDto player);
+    Task<int?> CreatePlayerWithStats(ILogger logger, PlayerUpsertDto player, PlayerStatsUpsertDto stats);
     Task<bool> UpdatePlayer(ILogger logger, int playerId, PlayerUpsertDto player);
+    Task<bool> UpdatePlayerWithStats(ILogger logger, int playerId, PlayerUpsertDto player, PlayerStatsUpsertDto stats);
+    Task<PlayerWriteOutcome> UpdatePlayerDetailed(ILogger logger, int playerId, PlayerUpsertDto player);
+    Task<PlayerWriteOutcome> UpdatePlayerWithStatsDetailed(ILogger logger, int playerId, PlayerUpsertDto player, PlayerStatsUpsertDto stats);
     Task<bool> DeletePlayer(ILogger logger, int playerId);
     Task<bool> UpsertPlayerStats(ILogger logger, int playerId, PlayerStatsUpsertDto stats);
 }
@@ -59,7 +72,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
     }
 
-    public async Task<bool> UpdatePlayer(ILogger logger, int playerId, PlayerUpsertDto player)
+    public async Task<int?> CreatePlayerWithStats(ILogger logger, PlayerUpsertDto player, PlayerStatsUpsertDto stats)
     {
         using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
@@ -72,7 +85,56 @@ public class PlayersV2WriteService : IPlayersV2WriteService
             {
                 logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
-                return false;
+                return null;
+            }
+
+            player.TeamCode = teamCode;
+
+            var createdId = await _playersRepo.CreatePlayer(connection, transaction, logger, player);
+            if (createdId <= 0)
+            {
+                transaction.Rollback();
+                return null;
+            }
+
+            var saved = await _playersRepo.UpsertPlayerStats(connection, transaction, logger, createdId, player.SportCode, stats);
+            if (!saved)
+            {
+                transaction.Rollback();
+                return null;
+            }
+
+            transaction.Commit();
+            return createdId;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating V2 player with stats.");
+            transaction.Rollback();
+            return null;
+        }
+    }
+
+    public async Task<bool> UpdatePlayer(ILogger logger, int playerId, PlayerUpsertDto player)
+    {
+        var outcome = await UpdatePlayerDetailed(logger, playerId, player);
+        return outcome == PlayerWriteOutcome.Success;
+    }
+
+    public async Task<PlayerWriteOutcome> UpdatePlayerDetailed(ILogger logger, int playerId, PlayerUpsertDto player)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            {
+                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                transaction.Rollback();
+                return PlayerWriteOutcome.InvalidTeam;
             }
 
             player.TeamCode = teamCode;
@@ -81,17 +143,66 @@ public class PlayersV2WriteService : IPlayersV2WriteService
             if (!updated)
             {
                 transaction.Rollback();
-                return false;
+                return PlayerWriteOutcome.NotFound;
             }
 
             transaction.Commit();
-            return true;
+            return PlayerWriteOutcome.Success;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error updating V2 player {PlayerId}.", playerId);
             transaction.Rollback();
-            return false;
+            return PlayerWriteOutcome.Error;
+        }
+    }
+
+    public async Task<bool> UpdatePlayerWithStats(ILogger logger, int playerId, PlayerUpsertDto player, PlayerStatsUpsertDto stats)
+    {
+        var outcome = await UpdatePlayerWithStatsDetailed(logger, playerId, player, stats);
+        return outcome == PlayerWriteOutcome.Success;
+    }
+
+    public async Task<PlayerWriteOutcome> UpdatePlayerWithStatsDetailed(ILogger logger, int playerId, PlayerUpsertDto player, PlayerStatsUpsertDto stats)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            {
+                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                transaction.Rollback();
+                return PlayerWriteOutcome.InvalidTeam;
+            }
+
+            player.TeamCode = teamCode;
+
+            var updated = await _playersRepo.UpdatePlayer(connection, transaction, logger, playerId, player);
+            if (!updated)
+            {
+                transaction.Rollback();
+                return PlayerWriteOutcome.NotFound;
+            }
+
+            var saved = await _playersRepo.UpsertPlayerStats(connection, transaction, logger, playerId, player.SportCode, stats);
+            if (!saved)
+            {
+                transaction.Rollback();
+                return PlayerWriteOutcome.StatsFailed;
+            }
+
+            transaction.Commit();
+            return PlayerWriteOutcome.Success;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating V2 player {PlayerId} with stats.", playerId);
+            transaction.Rollback();
+            return PlayerWriteOutcome.Error;
         }
     }
 

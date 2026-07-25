@@ -102,32 +102,25 @@ public static class NhlEndpoints
                     });
                 }
 
-                var createdId = await writeService.CreatePlayer(logger, player);
+                var hasStats = !string.IsNullOrWhiteSpace(sanitizedRoster.Handed)
+                    || sanitizedRoster.Goals.HasValue
+                    || sanitizedRoster.PenaltyMinutes.HasValue
+                    || sanitizedRoster.Points.HasValue
+                    || sanitizedRoster.SavePct.HasValue;
+
+                var createdId = hasStats
+                    ? await writeService.CreatePlayerWithStats(logger, player, new PlayerStatsUpsertDto
+                    {
+                        Handed = sanitizedRoster.Handed,
+                        Goals = sanitizedRoster.Goals,
+                        PenaltyMinutes = sanitizedRoster.PenaltyMinutes,
+                        Points = sanitizedRoster.Points,
+                        SavePct = sanitizedRoster.SavePct
+                    })
+                    : await writeService.CreatePlayer(logger, player);
 
                 if (createdId != null)
                 { 
-                    if (!string.IsNullOrWhiteSpace(sanitizedRoster.Handed)
-                        || sanitizedRoster.Goals.HasValue
-                        || sanitizedRoster.PenaltyMinutes.HasValue
-                        || sanitizedRoster.Points.HasValue
-                        || sanitizedRoster.SavePct.HasValue)
-                    {
-                        var statsUpdated = await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
-                        {
-                            Handed = sanitizedRoster.Handed,
-                            Goals = sanitizedRoster.Goals,
-                            PenaltyMinutes = sanitizedRoster.PenaltyMinutes,
-                            Points = sanitizedRoster.Points,
-                            SavePct = sanitizedRoster.SavePct
-                        });
-
-                        if (!statsUpdated)
-                        {
-                            logger.LogError("NHL stats upsert failed on create for PlayerId {PlayerId}.", createdId.Value);
-                            return Results.Problem("Player core record was created, but NHL stats upsert failed. Check logs for details.");
-                        }
-                    }
-
                     return Results.Ok("Added to NHL Roster.");
                 }
                 else
@@ -209,38 +202,48 @@ public static class NhlEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
+                var hasStats = !string.IsNullOrWhiteSpace(sanitizedRoster.Handed)
+                    || sanitizedRoster.Goals.HasValue
+                    || sanitizedRoster.PenaltyMinutes.HasValue
+                    || sanitizedRoster.Points.HasValue
+                    || sanitizedRoster.SavePct.HasValue;
 
-                if (updated)
-                {
-                    if (!string.IsNullOrWhiteSpace(sanitizedRoster.Handed)
-                        || sanitizedRoster.Goals.HasValue
-                        || sanitizedRoster.PenaltyMinutes.HasValue
-                        || sanitizedRoster.Points.HasValue
-                        || sanitizedRoster.SavePct.HasValue)
+                var updateOutcome = hasStats
+                    ? await writeService.UpdatePlayerWithStatsDetailed(logger, sanitizedRoster.PlayerId, player, new PlayerStatsUpsertDto
                     {
-                        var statsUpdated = await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
-                        {
-                            Handed = sanitizedRoster.Handed,
-                            Goals = sanitizedRoster.Goals,
-                            PenaltyMinutes = sanitizedRoster.PenaltyMinutes,
-                            Points = sanitizedRoster.Points,
-                            SavePct = sanitizedRoster.SavePct
-                        });
+                        Handed = sanitizedRoster.Handed,
+                        Goals = sanitizedRoster.Goals,
+                        PenaltyMinutes = sanitizedRoster.PenaltyMinutes,
+                        Points = sanitizedRoster.Points,
+                        SavePct = sanitizedRoster.SavePct
+                    })
+                    : await writeService.UpdatePlayerDetailed(logger, sanitizedRoster.PlayerId, player);
 
-                        if (!statsUpdated)
-                        {
-                            logger.LogError("NHL stats upsert failed on update for PlayerId {PlayerId}.", sanitizedRoster.PlayerId);
-                            return Results.Problem("NHL player was updated, but stats upsert failed. Check logs for details.");
-                        }
-                    }
-
+                if (updateOutcome == PlayerWriteOutcome.Success)
+                {
                     return Results.Ok("Updated the NHL Roster.");
                 }
-                else
+
+                if (updateOutcome == PlayerWriteOutcome.NotFound)
                 {
                     return Results.NotFound("NHL player was not found or update failed.");
                 }
+
+                if (updateOutcome == PlayerWriteOutcome.InvalidTeam)
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code could not be resolved for NHL."
+                    });
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.StatsFailed)
+                {
+                    return Results.Problem("NHL player update failed while writing stats. Check logs for details.");
+                }
+
+                return Results.Problem("Error updating NHL Roster, check the logs.");
             });
 
             // Delete

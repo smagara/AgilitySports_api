@@ -90,19 +90,18 @@ public static class NflEndpoints
                     });
                 }
 
-                var createdId = await writeService.CreatePlayer(logger, player);
+                var hasStats = sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue;
+
+                var createdId = hasStats
+                    ? await writeService.CreatePlayerWithStats(logger, player, new PlayerStatsUpsertDto
+                    {
+                        Sacks = sanitizedRoster.Sacks,
+                        Touchdowns = sanitizedRoster.Touchdowns
+                    })
+                    : await writeService.CreatePlayer(logger, player);
 
                 if (createdId != null)
                 { 
-                    if (sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue)
-                    {
-                        await writeService.UpsertPlayerStats(logger, createdId.Value, new PlayerStatsUpsertDto
-                        {
-                            Sacks = sanitizedRoster.Sacks,
-                            Touchdowns = sanitizedRoster.Touchdowns
-                        });
-                    }
-
                     return Results.Ok("Added to NFL Roster.");
                 }
                 else
@@ -172,25 +171,41 @@ public static class NflEndpoints
                     });
                 }
 
-                var updated = await writeService.UpdatePlayer(logger, sanitizedRoster.PlayerId, player);
+                var hasStats = sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue;
 
-                if (updated)
-                {
-                    if (sanitizedRoster.Sacks.HasValue || sanitizedRoster.Touchdowns.HasValue)
+                var updateOutcome = hasStats
+                    ? await writeService.UpdatePlayerWithStatsDetailed(logger, sanitizedRoster.PlayerId, player, new PlayerStatsUpsertDto
                     {
-                        await writeService.UpsertPlayerStats(logger, sanitizedRoster.PlayerId, new PlayerStatsUpsertDto
-                        {
-                            Sacks = sanitizedRoster.Sacks,
-                            Touchdowns = sanitizedRoster.Touchdowns
-                        });
-                    }
+                        Sacks = sanitizedRoster.Sacks,
+                        Touchdowns = sanitizedRoster.Touchdowns
+                    })
+                    : await writeService.UpdatePlayerDetailed(logger, sanitizedRoster.PlayerId, player);
 
+                if (updateOutcome == PlayerWriteOutcome.Success)
+                {
                     return Results.Ok("Updated NFL Roster.");
                 }
-                else
+
+                if (updateOutcome == PlayerWriteOutcome.NotFound)
                 {
                     return Results.NotFound("NFL player was not found or update failed.");
                 }
+
+                if (updateOutcome == PlayerWriteOutcome.InvalidTeam)
+                {
+                    return Results.BadRequest(new
+                    {
+                        Error = "Validation failed",
+                        Message = "Team code could not be resolved for NFL."
+                    });
+                }
+
+                if (updateOutcome == PlayerWriteOutcome.StatsFailed)
+                {
+                    return Results.Problem("NFL player update failed while writing stats. Check logs for details.");
+                }
+
+                return Results.Problem("Error updating NFL Roster, check the logs.");
             });
 
             // Delete
