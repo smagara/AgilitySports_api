@@ -15,7 +15,7 @@ public class PlayerStatsUpsertDto
     public decimal? AssistsPerGame { get; set; }
 
     // NFL
-    public int? Sacks { get; set; }
+    public decimal? Sacks { get; set; }
     public int? Touchdowns { get; set; }
 
     // NHL

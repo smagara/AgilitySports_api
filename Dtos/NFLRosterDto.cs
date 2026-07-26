@@ -20,4 +20,6 @@ public class NFLRosterDto
     public string? BirthCountry { get; set; }
     public short? DraftYear { get; set; }
     public short? SeasonYear { get; set; }
+    public decimal? Sacks { get; set; }
+    public short? Touchdowns { get; set; }
 }

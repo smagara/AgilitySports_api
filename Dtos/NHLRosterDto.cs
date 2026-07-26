@@ -16,11 +16,15 @@ public class NHLRosterDto
     public string? Height { get; set; }
     public string? Weight { get; set; }
     public DateTime? DateOfBirth { get; set; }
-    public string? Handed { get; set; }
     public byte? Age { get; set; }
     public short? DraftYear { get; set; }
     public short? SeasonYear { get; set; }
     public string? College { get; set; }
     public string? BirthCityState { get; set; }
     public string? BirthCountry { get; set; }
+    public string? Handed { get; set; }
+    public string? Goals { get; set; }
+    public string? PenaltyMinutes { get; set; }
+    public string? Points { get; set; }
+    public string? SavePct { get; set; }
 }

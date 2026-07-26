@@ -37,6 +37,8 @@ public class NFLRepo : BaseRepo, INFLRepo
                         ,p.draftYear as DraftYear
                         ,p.seasonYear as SeasonYear
                         ,p.playerId as PlayerId
+                        ,nfl.sacks as Sacks
+                        ,nfl.touchdowns as Touchdowns
                     from core.Players p
                     left join core.Teams t
                         on t.sportCode = p.sportCode
@@ -44,6 +46,9 @@ public class NFLRepo : BaseRepo, INFLRepo
                     left join reference.PositionCodes pc
                         on pc.sportCode = p.sportCode
                         and pc.positionCode = p.positionCode
+                    left join stats.NFLPlayerStats nfl
+                        on nfl.playerID = p.playerID
+                        and nfl.sportCode = p.sportCode
                     where p.sportCode = 'NFL'
                         and (@playerId is null or p.playerId = @playerId)
                     order by 

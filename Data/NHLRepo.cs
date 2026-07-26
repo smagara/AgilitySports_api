@@ -32,7 +32,6 @@ public class NHLRepo : BaseRepo, INHLRepo
                         ,convert(varchar(10), p.heightInches) as Height
                         ,convert(varchar(10), p.weight) as Weight
                         ,p.dateOfBirth as DateOfBirth
-                        ,nhl.handed as Handed
                         ,try_convert(tinyint, datediff(year, p.dateOfBirth, getdate())) as Age
                         ,p.draftYear as DraftYear
                         ,p.seasonYear as SeasonYear
@@ -40,6 +39,11 @@ public class NHLRepo : BaseRepo, INHLRepo
                         ,p.birthCityState as BirthCityState
                         ,p.birthCountry as BirthCountry
                         ,p.playerID as PlayerId
+                        ,nhl.handed as Handed
+                        ,nhl.goals as Goals
+                        ,nhl.penaltyMinutes as PenaltyMinutes
+                        ,nhl.points as Points
+                        ,nhl.savePct as SavePct
                     from core.Players p
                     left join core.Teams t
                         on t.sportCode = p.sportCode
@@ -62,7 +66,7 @@ public class NHLRepo : BaseRepo, INHLRepo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating NHL player.");
+            logger.LogError(ex, "Error fetching NHL player(s).");
             return null;
         }
     }
