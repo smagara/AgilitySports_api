@@ -34,6 +34,9 @@ public class NBARepo : BaseRepo, INBARepo
                 ,p.birthCountry as BirthCountry
                 ,p.draftYear as DraftYear
                 ,p.seasonYear as SeasonYear
+                ,nba.pointsPerGame as PointsPerGame
+                ,nba.reboundsPerGame as ReboundsPerGame
+                ,nba.assistsPerGame as AssistsPerGame
             from core.Players p
             left join core.Teams t
                 on t.sportCode = p.sportCode
@@ -41,6 +44,9 @@ public class NBARepo : BaseRepo, INBARepo
             left join reference.PositionCodes pc
                 on pc.sportCode = p.sportCode
                 and pc.positionCode = p.positionCode
+            left join stats.NBAPlayerStats nba
+                on nba.playerID = p.playerID
+                and nba.sportCode = p.sportCode
             where p.sportCode = 'NBA'
                 and (@playerId is null or p.playerID = @playerId)
             order by 

@@ -23,6 +23,6 @@ public record NFLRoster
     public string? BirthCountry { get; set; }
     public short? DraftYear { get; set; }
     public short? SeasonYear { get; set; }
-    public int? Sacks { get; set; }
+    public decimal? Sacks { get; set; }
     public int? Touchdowns { get; set; }
 }
