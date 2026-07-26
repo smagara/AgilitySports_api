@@ -1,8 +1,6 @@
 using AgilitySportsAPI.Data;
 using AgilitySportsAPI.Dtos;
-using Dapper;
 using Microsoft.Data.SqlClient;
-using System.Configuration;
 
 namespace AgilitySportsAPI.Services;
 
@@ -27,33 +25,34 @@ public interface IPlayersV2WriteService
     Task<bool> UpsertPlayerStats(ILogger logger, int playerId, PlayerStatsUpsertDto stats);
 }
 
-public class PlayersV2WriteService : IPlayersV2WriteService
+public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
 {
-    private readonly string _connectionString;
     private readonly IPlayersRepo _playersRepo;
 
-    public PlayersV2WriteService(IConfiguration configuration, IPlayersRepo playersRepo)
+    public PlayersV2WriteService(IConfiguration configuration, IPlayersRepo playersRepo) : base(configuration)
     {
         _playersRepo = playersRepo;
-        _connectionString = configuration.GetConnectionString("DockerConnectionV2") ?? "";
-        if (_connectionString == "")
-        {
-            throw new ConfigurationErrorsException("ConnectionStrings:DockerConnectionV2 must be set for V2 player APIs.");
-        }
+    }
+
+    private async Task<SqlConnection> OpenConnectionAsync()
+    {
+        var connection = new SqlConnection(base.connectionString);
+        await base.GenToken(connection);
+        await connection.OpenAsync();
+        return connection;
     }
 
     public async Task<int?> CreatePlayer(ILogger logger, PlayerUpsertDto player)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
         {
-            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            var teamCode = NormalizeTeamCode(player.TeamCode);
             if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
             {
-                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return null;
             }
@@ -74,16 +73,15 @@ public class PlayersV2WriteService : IPlayersV2WriteService
 
     public async Task<int?> CreatePlayerWithStats(ILogger logger, PlayerUpsertDto player, PlayerStatsUpsertDto stats)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
         {
-            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            var teamCode = NormalizeTeamCode(player.TeamCode);
             if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
             {
-                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return null;
             }
@@ -123,16 +121,15 @@ public class PlayersV2WriteService : IPlayersV2WriteService
 
     public async Task<PlayerWriteOutcome> UpdatePlayerDetailed(ILogger logger, int playerId, PlayerUpsertDto player)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
         {
-            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            var teamCode = NormalizeTeamCode(player.TeamCode);
             if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
             {
-                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return PlayerWriteOutcome.InvalidTeam;
             }
@@ -165,16 +162,15 @@ public class PlayersV2WriteService : IPlayersV2WriteService
 
     public async Task<PlayerWriteOutcome> UpdatePlayerWithStatsDetailed(ILogger logger, int playerId, PlayerUpsertDto player, PlayerStatsUpsertDto stats)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
         {
-            var teamCode = await ResolveTeamCodeAsync(connection, transaction, player.SportCode, player.TeamCode);
+            var teamCode = NormalizeTeamCode(player.TeamCode);
             if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
             {
-                logger.LogError("Invalid team value '{Team}' for sport '{SportCode}'. Unable to resolve 3-letter team code.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return PlayerWriteOutcome.InvalidTeam;
             }
@@ -208,8 +204,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
 
     public async Task<bool> DeletePlayer(ILogger logger, int playerId)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
@@ -242,8 +237,7 @@ public class PlayersV2WriteService : IPlayersV2WriteService
 
     public async Task<bool> UpsertPlayerStats(ILogger logger, int playerId, PlayerStatsUpsertDto stats)
     {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync();
+        using var connection = await OpenConnectionAsync();
 
         using var transaction = connection.BeginTransaction();
         try
@@ -273,35 +267,13 @@ public class PlayersV2WriteService : IPlayersV2WriteService
         }
     }
 
-    private static async Task<string?> ResolveTeamCodeAsync(
-        SqlConnection connection,
-        SqlTransaction transaction,
-        string? sportCode,
-        string? teamValue)
+    private static string? NormalizeTeamCode(string? teamCode)
     {
-        var normalizedSport = string.IsNullOrWhiteSpace(sportCode) ? null : sportCode.Trim().ToUpperInvariant();
-        var normalizedTeam = string.IsNullOrWhiteSpace(teamValue) ? null : teamValue.Trim();
-
-        if (string.IsNullOrWhiteSpace(normalizedSport) || string.IsNullOrWhiteSpace(normalizedTeam))
+        if (string.IsNullOrWhiteSpace(teamCode))
         {
             return null;
         }
 
-        var sql = @"
-                select top 1 teamCode
-                from core.Teams
-                where sportCode = @sportCode
-                  and (
-                        upper(teamCode) = upper(@team)
-                     or upper(teamShortName) = upper(@team)
-                     or upper(teamName) = upper(@team)
-                  );";
-
-        var resolved = await connection.QuerySingleOrDefaultAsync<string>(
-            sql,
-            new { sportCode = normalizedSport, team = normalizedTeam },
-            transaction);
-
-        return resolved?.Trim().ToUpperInvariant();
+        return teamCode.Trim().ToUpperInvariant();
     }
 }

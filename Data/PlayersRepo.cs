@@ -5,17 +5,10 @@ using System.Configuration;
 
 namespace AgilitySportsAPI.Data;
 
-public class PlayersRepo : IPlayersRepo
+public class PlayersRepo : BaseRepo, IPlayersRepo
 {
-    private readonly string _connectionString;
-
-    public PlayersRepo(IConfiguration configuration)
+    public PlayersRepo(IConfiguration configuration) : base(configuration)
     {
-        _connectionString = configuration.GetConnectionString("DockerConnectionV2") ?? "";
-        if (_connectionString == "")
-        {
-            throw new ConfigurationErrorsException("ConnectionStrings:DockerConnectionV2 must be set for V2 player APIs.");
-        }
     }
 
     public async Task<IEnumerable<PlayerSummaryDto>?> GetPlayers(
@@ -54,7 +47,8 @@ public class PlayersRepo : IPlayersRepo
                         and (@search is null or p.firstName like @searchLike or p.lastName like @searchLike)
                     order by p.lastName, p.firstName, p.playerID;";
 
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(base.connectionString);
+            await base.GenToken(connection);
 
             var trimmedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
             var trimmedSportCode = string.IsNullOrWhiteSpace(sportCode) ? null : sportCode.Trim();
@@ -103,7 +97,8 @@ public class PlayersRepo : IPlayersRepo
                         and pc.positionCode = p.positionCode
                     where p.playerID = @playerId;";
 
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(base.connectionString);
+            await base.GenToken(connection);
             return await connection.QuerySingleOrDefaultAsync<PlayerSummaryDto>(sql, new { playerId });
         }
         catch (Exception ex)
@@ -152,7 +147,8 @@ public class PlayersRepo : IPlayersRepo
                         and nhl.sportCode = p.sportCode
                     where p.playerID = @playerId;";
 
-            using var connection = new SqlConnection(_connectionString);
+            using var connection = new SqlConnection(base.connectionString);
+            await base.GenToken(connection);
             return await connection.QuerySingleOrDefaultAsync<PlayerStatsDto>(sql, new { playerId });
         }
         catch (Exception ex)
