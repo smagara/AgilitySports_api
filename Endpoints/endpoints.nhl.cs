@@ -262,7 +262,6 @@ public static class NhlEndpoints
             });
         }
 
-        MapNhlRoutes(routes.MapGroup("api/nhl"));
         MapNhlRoutes(routes.MapGroup("api/v2/nhl"));
     }
 

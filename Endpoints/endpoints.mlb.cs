@@ -263,7 +263,6 @@ public static class MlbDataEndpoints
             });
         }
 
-        MapMlbRoutes(routes.MapGroup("api/mlb"));
         MapMlbRoutes(routes.MapGroup("api/v2/mlb"));
     }
 
