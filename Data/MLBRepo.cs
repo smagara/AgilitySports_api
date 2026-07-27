@@ -30,7 +30,7 @@ public class MLBRepo : BaseRepo, IMLBRepo
     {
         var sql = @"
             select
-                convert(varchar(20), p.playerID) as PlayerId
+                p.playerID as PlayerId
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
                 ,p.teamCode as TeamCode
@@ -73,7 +73,7 @@ public class MLBRepo : BaseRepo, IMLBRepo
     {
         var sql = @"
             select 
-                convert(varchar(20), p.playerID) as PlayerId
+                p.playerID as PlayerId
                 ,p.firstName as FirstName
                 ,p.lastName as LastName
                 ,p.teamCode as TeamCode

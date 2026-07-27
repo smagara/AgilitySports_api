@@ -50,9 +50,9 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
         try
         {
             var teamCode = NormalizeTeamCode(player.TeamCode);
-            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            if (!IsValidTeamCode(teamCode))
             {
-                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected TeamCode up to 3 characters.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return null;
             }
@@ -79,9 +79,9 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
         try
         {
             var teamCode = NormalizeTeamCode(player.TeamCode);
-            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            if (!IsValidTeamCode(teamCode))
             {
-                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected TeamCode up to 3 characters.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return null;
             }
@@ -127,9 +127,9 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
         try
         {
             var teamCode = NormalizeTeamCode(player.TeamCode);
-            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            if (!IsValidTeamCode(teamCode))
             {
-                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected TeamCode up to 3 characters.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return PlayerWriteOutcome.InvalidTeam;
             }
@@ -168,9 +168,9 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
         try
         {
             var teamCode = NormalizeTeamCode(player.TeamCode);
-            if (string.IsNullOrWhiteSpace(teamCode) || teamCode.Length != 3)
+            if (!IsValidTeamCode(teamCode))
             {
-                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected 3-letter TeamCode.", player.TeamCode, player.SportCode);
+                logger.LogError("Invalid team code '{Team}' for sport '{SportCode}'. Expected TeamCode up to 3 characters.", player.TeamCode, player.SportCode);
                 transaction.Rollback();
                 return PlayerWriteOutcome.InvalidTeam;
             }
@@ -275,5 +275,10 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
         }
 
         return teamCode.Trim().ToUpperInvariant();
+    }
+
+    private static bool IsValidTeamCode(string? teamCode)
+    {
+        return !string.IsNullOrWhiteSpace(teamCode) && teamCode.Length <= 3;
     }
 }
