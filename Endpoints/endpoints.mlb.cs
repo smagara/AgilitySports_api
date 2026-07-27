@@ -161,7 +161,8 @@ public static class MlbDataEndpoints
                 }
 
                 var sanitizedRoster = sanitizer.SanitizeModel(roster, logger);
-                if (!int.TryParse(sanitizedRoster.PlayerId, out var playerId) || playerId <= 0)
+                var playerId = sanitizedRoster.PlayerId;
+                if (playerId <= 0)
                 {
                     return Results.BadRequest(new
                     {
