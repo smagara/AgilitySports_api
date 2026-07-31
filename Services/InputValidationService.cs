@@ -188,7 +188,9 @@ public class InputValidationService : IInputValidationService
             // NHL
             "C", "D", "F", "G", "LW", "RW",
             // MLB
-            "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS"
+            "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS",
+            // FIF (FIFA World Cup)
+            "G", "D", "M", "F", "UNK"
         };
 
         var cleanInput = input.Trim().ToUpper();
@@ -215,6 +217,7 @@ public class InputValidationService : IInputValidationService
             "NFL" => new[] { "C", "CB", "DB", "DE", "DL", "DT", "FB", "G", "ILB", "K", "LB", "LS", "NT", "OL", "OLB", "OT", "P", "QB", "RB", "S", "TE", "WR" },
             "NHL" => new[] { "C", "D", "F", "G", "LW", "RW" },
             "MLB" => new[] { "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS" },
+            "FIF" => new[] { "G", "D", "M", "F", "UNK" },
 
             _ => new string[0] // Unknown sport
         };

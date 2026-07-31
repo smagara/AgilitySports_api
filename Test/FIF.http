@@ -1,0 +1,69 @@
+@url = http://localhost:1106/api/v2/
+
+### list FIF players
+GET {{url}}fif/roster
+
+### get FIF player by playerId
+GET {{url}}fif/roster?playerId=105228
+
+### create new FIF player
+POST {{url}}fif/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "teamCode": "USA",
+    "firstName": "Test",
+    "lastName": "Forward",
+    "position": "F",
+    "number": "9",
+    "height": "72",
+    "weight": "175",
+    "dateOfBirth": "1999-01-15T00:00:00",
+    "birthCityState": "Dallas, TX",
+    "birthCountry": "United States",
+    "college": null,
+    "draftYear": 2026,
+    "seasonYear": 2026,
+    "totalGoals": 9,
+    "assists": 13,
+    "saves": 2
+}
+
+### update FIF player by playerId
+PUT {{url}}fif/roster
+Content-Type: application/json
+
+{
+    "playerId": 9001001,
+    "teamCode": "USA",
+    "firstName": "Test",
+    "lastName": "Forward-Updated",
+    "position": "M",
+    "number": "10",
+    "height": "72",
+    "weight": "178",
+    "dateOfBirth": "1999-01-15T00:00:00",
+    "birthCityState": "Dallas, TX",
+    "birthCountry": "United States",
+    "college": null,
+    "draftYear": 2026,
+    "seasonYear": 2026,
+    "totalGoals": 10,
+    "assists": 14,
+    "saves": 3
+}
+
+### delete FIF player by playerId
+DELETE {{url}}fif/roster?playerId=9000002
+
+### validation check (missing teamCode)
+POST {{url}}fif/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "firstName": "Bad",
+    "lastName": "Payload",
+    "position": "F"
+}

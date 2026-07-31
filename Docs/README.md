@@ -1,5 +1,9 @@
 # Philly,NET - August 16, 2023
 
+## Current API Additions
+
+- FIF V2 API documentation: [FIF-API.md](FIF-API.md)
+
 ## [Meetup site](https://www.meetup.com/philly-net/events/295026043/) for this event
 
 ***

@@ -24,4 +24,9 @@ public class PlayerStatsUpsertDto
     public int? PenaltyMinutes { get; set; }
     public int? Points { get; set; }
     public decimal? SavePct { get; set; }
+
+    // FIF (FIFA World Cup)
+    public int? TotalGoals { get; set; }
+    public int? Assists { get; set; }
+    public int? Saves { get; set; }
 }
