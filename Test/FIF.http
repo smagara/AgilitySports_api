@@ -25,8 +25,9 @@ Content-Type: application/json
     "college": null,
     "draftYear": 2026,
     "seasonYear": 2026,
-    "totalGoals" : 9,
-    "assists" : 13
+    "totalGoals": 9,
+    "assists": 13,
+    "saves": 2
 }
 
 ### update FIF player by playerId
@@ -47,7 +48,10 @@ Content-Type: application/json
     "birthCountry": "United States",
     "college": null,
     "draftYear": 2026,
-    "seasonYear": 2026
+    "seasonYear": 2026,
+    "totalGoals": 10,
+    "assists": 14,
+    "saves": 3
 }
 
 ### delete FIF player by playerId

@@ -31,6 +31,8 @@ This document covers the FIFA/FIF roster CRUD endpoints exposed by AgilitySports
 - `teamCode` is the required internal key for team resolution.
 - Typical payload fields:
   - `playerId`, `teamCode`, `firstName`, `lastName`, `position`, `number`, `height`, `weight`, `dateOfBirth`, `birthCityState`, `birthCountry`, `college`, `draftYear`, `seasonYear`.
+  - FIF stats fields (optional): `totalGoals`, `assists`, `saves`.
+- FIF stats values must be whole numbers greater than or equal to `0`.
 
 ## REST Client Tests
 
