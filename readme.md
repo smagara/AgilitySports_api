@@ -4,7 +4,9 @@
 
 ---
 
-### Now as of July 2026 all AgilitySports repos are aligned to the new, normalized, version 2 of the AgilitySports database model. This paves the way for additional lookup functionality and planned AI tool support.
+### Now as of July 2026 a Docker container is available for this API Repo, instructions below!
+
+### All AgilitySports repos are aligned to the new, normalized, version 2 of the AgilitySports database model. This paves the way for additional lookup functionality and planned AI tool support.
 
 ---
 
@@ -36,6 +38,39 @@ Note for Devs: <br/>
 
 ![Database config screenshot](images/dbconfig.png)
 </details>
+
+---
+
+## Run the API in Docker
+
+Prerequisite: [Docker Desktop](https://www.docker.com/products/docker-desktop/). For `Database:Mode=Docker`, also start the V2 SQL stack from the AgilitySports_Data repo (`.\BuildDockerImage_V2.ps1`) so SQL is listening on port `21433`.
+
+From the API repo root:
+
+```powershell
+.\BuildDockerImage.ps1
+```
+
+Optional switches:
+
+- `-ForegroundLogs` - stream container logs after start
+- `-NoBuild` - start without rebuilding the image
+- `-Recreate` - stop and remove the existing compose stack before starting
+
+On first run the script copies `Container\.env.example` to `Container\.env` if needed. Edit `.env` to change the published port or SQL connection string.
+
+After start:
+
+- API: `http://localhost:1106`
+- Swagger UI: `http://localhost:1106/swagger`
+- Health: `http://localhost:1106/api/v2/checkhealth`
+- DB health: `http://localhost:1106/api/v2/health/db`
+
+The container reaches the host-published SQL V2 instance via `host.docker.internal,21433` (aligned with AgilitySports_Data defaults). View logs later with:
+
+```powershell
+docker compose -f .\Container\docker-compose.yml logs -f api
+```
 
 ---
 
