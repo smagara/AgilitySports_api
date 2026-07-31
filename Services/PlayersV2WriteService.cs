@@ -57,7 +57,7 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
                 return null;
             }
 
-            player.TeamCode = teamCode;
+            player.TeamCode = teamCode!;
 
             var createdId = await _playersRepo.CreatePlayer(connection, transaction, logger, player);
             transaction.Commit();
@@ -86,7 +86,7 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
                 return null;
             }
 
-            player.TeamCode = teamCode;
+            player.TeamCode = teamCode!;
 
             var createdId = await _playersRepo.CreatePlayer(connection, transaction, logger, player);
             if (createdId <= 0)
@@ -134,7 +134,7 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
                 return PlayerWriteOutcome.InvalidTeam;
             }
 
-            player.TeamCode = teamCode;
+            player.TeamCode = teamCode!;
 
             var updated = await _playersRepo.UpdatePlayer(connection, transaction, logger, playerId, player);
             if (!updated)
@@ -175,7 +175,7 @@ public class PlayersV2WriteService : BaseRepo, IPlayersV2WriteService
                 return PlayerWriteOutcome.InvalidTeam;
             }
 
-            player.TeamCode = teamCode;
+            player.TeamCode = teamCode!;
 
             var updated = await _playersRepo.UpdatePlayer(connection, transaction, logger, playerId, player);
             if (!updated)
