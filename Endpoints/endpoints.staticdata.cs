@@ -50,7 +50,6 @@ public static class StaticDataEndpoints
             });
         }
 
-        MapStaticDataRoutes(routes.MapGroup("api/staticdata"));
         MapStaticDataRoutes(routes.MapGroup("api/v2/staticdata"));
     }
 }

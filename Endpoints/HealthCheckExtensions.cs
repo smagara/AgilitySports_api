@@ -1,3 +1,4 @@
+using AgilitySportsAPI.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Http;
 
@@ -7,44 +8,51 @@ public static class HealthCheckExtensions
 {
     public static void MapDatabaseHealthEndpoint(this IEndpointRouteBuilder routes, IConfiguration configuration)
     {
-        var API = routes.MapGroup("api");
-        API.MapGet("health/db", async (ILogger<object> logger) =>
+        var v2Api = routes.MapGroup("api/v2");
+        v2Api.MapGet("health/db", async (ILogger<object> logger) =>
         {
-            string status;
-            string dbMode = (configuration["Database:Mode"] ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(dbMode))
-            {
-                bool cloudOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
-                dbMode = cloudOffline ? "LocalDb" : "Azure";
-            }
-
-            string? connStr = null;
             try
             {
-                string connectionKey = dbMode.ToUpperInvariant() switch
-                {
-                    "AZURE" => "AzureConnection",
-                    "DOCKER" => "DockerConnection",
-                    "LOCALDB" => "LocalConnection",
-                    _ => throw new Exception("Database:Mode must be Azure, Docker, or LocalDb.")
-                };
-
-                connStr = configuration.GetConnectionString(connectionKey);
-                if (string.IsNullOrWhiteSpace(connStr))
-                    throw new Exception($"Connection string '{connectionKey}' is not configured.");
-
-                using var conn = new SqlConnection(connStr);
+                var probe = new DbHealthProbeRepo(configuration);
+                using var conn = new SqlConnection(probe.ConnectionString);
+                await probe.ApplyAuthTokenAsync(conn);
                 await conn.OpenAsync();
-                status = $"Database connection succeeded. Mode: {dbMode}, DataSource: {conn.DataSource}, DB: {conn.Database}";
+                string status = $"Database connection succeeded. Mode: {probe.DatabaseMode}, DataSource: {conn.DataSource}, DB: {conn.Database}";
                 await conn.CloseAsync();
+                return Results.Ok(status);
             }
             catch (Exception ex)
             {
-                status = $"Database connection failed. Mode: {dbMode}, Error: {ex.Message}";
+                string dbMode = ResolveDatabaseMode(configuration);
+                string status = $"Database connection failed. Mode: {dbMode}, Error: {ex.Message}";
                 logger.LogError(ex, "Database health check failed");
                 return Results.Problem(status);
             }
-            return Results.Ok(status);
         });
+    }
+
+    private static string ResolveDatabaseMode(IConfiguration configuration)
+    {
+        string? configuredMode = configuration["Database:Mode"];
+        if (!string.IsNullOrWhiteSpace(configuredMode))
+        {
+            return configuredMode.Trim();
+        }
+
+        bool cloudOffline = bool.Parse(configuration["AzureSettings:CloudOffline"] ?? "false");
+        return cloudOffline ? "LocalDb" : "Azure";
+    }
+
+    private sealed class DbHealthProbeRepo : BaseRepo
+    {
+        public DbHealthProbeRepo(IConfiguration configuration) : base(configuration)
+        {
+        }
+
+        public string ConnectionString => connectionString;
+
+        public string DatabaseMode => databaseMode;
+
+        public Task ApplyAuthTokenAsync(SqlConnection connection) => GenToken(connection);
     }
 }

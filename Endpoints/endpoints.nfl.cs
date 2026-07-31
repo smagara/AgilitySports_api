@@ -224,7 +224,6 @@ public static class NflEndpoints
             });
         }
 
-        MapNflRoutes(routes.MapGroup("api/nfl"));
         MapNflRoutes(routes.MapGroup("api/v2/nfl"));
     }
 }

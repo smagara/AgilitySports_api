@@ -6,7 +6,6 @@ public interface IMLBRepo
 {
     #region MLB
 
-    Task<IEnumerable<MLBRoster>> GetAllMLBRoster();
     Task<IEnumerable<MLBRosterDto>> GetMLBRoster(ILogger<MLBRoster> logger);    
     Task<IEnumerable<MLBAttendance>> GetAllMLBAttendance();
     Task<IEnumerable<MLBAttendanceDto>> GetMLBAttendance(ILogger<MLBAttendanceDto> logger, short? year);

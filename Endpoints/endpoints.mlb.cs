@@ -19,12 +19,6 @@ public static class MlbDataEndpoints
     {
         void MapMlbRoutes(RouteGroupBuilder mlb)
         {
-            // Endpoint to get all MLB rosters
-            mlb.MapGet("roster/all", async (ILogger<MLBRoster> logger, IMLBRepo repoBaseball) =>
-            {
-                return Results.Ok(await repoBaseball.GetAllMLBRoster());
-            });
-
             // Endpoint to get MLB roster with logging
             mlb.MapGet("roster", async (ILogger<MLBRoster> logger, IMLBRepo repoBaseball) =>
             {
@@ -263,7 +257,6 @@ public static class MlbDataEndpoints
             });
         }
 
-        MapMlbRoutes(routes.MapGroup("api/mlb"));
         MapMlbRoutes(routes.MapGroup("api/v2/mlb"));
     }
 

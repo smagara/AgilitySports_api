@@ -226,7 +226,6 @@ public static class NbaEndpoints
             });
         }
 
-        MapNbaRoutes(routes.MapGroup("api/nba"));
         MapNbaRoutes(routes.MapGroup("api/v2/nba"));
     }
 

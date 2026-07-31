@@ -25,50 +25,7 @@ public class MLBRepo : BaseRepo, IMLBRepo
     }
 
     #region MLB.Roster
-
-    public async Task<IEnumerable<MLBRoster>> GetAllMLBRoster()
-    {
-        var sql = @"
-            select
-                p.playerID as PlayerId
-                ,p.firstName as FirstName
-                ,p.lastName as LastName
-                ,p.teamCode as TeamCode
-                ,coalesce(t.teamShortName, p.teamCode) as TeamName
-                ,null as League
-                ,convert(varchar(10), p.number) as Number
-                ,coalesce(pc.positionDesc, p.positionCode) as Position
-                ,mlb.throws as Throws
-                ,mlb.bats as Bats
-                ,mlb.battingAverage as BattingAverage
-                ,mlb.homeRuns as HomeRuns
-                ,mlb.era as Era
-                ,convert(varchar(10), p.heightInches) as Height
-                ,convert(varchar(10), p.weight) as Weight
-                ,coalesce(convert(datetime, p.dateOfBirth), convert(datetime, '1900-01-01')) as DateOfBirth
-                ,p.birthCountry as BirthCountry
-                ,p.birthCityState as BirthCityState
-            from core.Players p
-            left join core.Teams t
-                on t.sportCode = p.sportCode
-                and t.teamCode = p.teamCode
-            left join reference.PositionCodes pc
-                on pc.sportCode = p.sportCode
-                and pc.positionCode = p.positionCode
-            left join stats.MLBPlayerStats mlb
-                on mlb.sportCode = p.sportCode
-                and mlb.playerID = p.playerID
-            where p.sportCode = 'MLB'
-            order by p.playerID, p.lastName, p.firstName";
-
-        using (var connection = new SqlConnection(base.connectionString))
-        {
-            await base.GenToken(connection);
-            return await connection.QueryAsync<MLBRoster>(sql);
-        }
-
-    }
-
+    
     public async Task<IEnumerable<MLBRosterDto>> GetMLBRoster(ILogger<MLBRoster> logger)
     {
         var sql = @"

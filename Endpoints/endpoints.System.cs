@@ -12,7 +12,6 @@ public static class SystemEndpoints
     /// <param name="configuration">The application configuration (appsettings.json).</param>
     public static void MapSystemEndpoints(this IEndpointRouteBuilder routes, IConfiguration configuration)
     {
-        var legacyApi = routes.MapGroup("api");
         var v2Api = routes.MapGroup("api/v2");
 
         static IResult GetVersion(IConfiguration config)
@@ -28,19 +27,9 @@ public static class SystemEndpoints
             return Results.Ok(reply);
         }
 
-        legacyApi.MapGet("version", (ILogger<Version> logger) =>
-        {
-            return GetVersion(configuration);
-        });
-
         v2Api.MapGet("version", (ILogger<Version> logger) =>
         {
             return GetVersion(configuration);
-        });
-
-        legacyApi.MapGet("checkhealth", (ILogger<Version> logger) =>
-        {
-            return GetHealth(logger);
         });
 
         v2Api.MapGet("checkhealth", (ILogger<Version> logger) =>
