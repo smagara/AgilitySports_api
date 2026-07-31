@@ -132,6 +132,9 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                         ,nhl.penaltyMinutes as PenaltyMinutes
                         ,nhl.points as Points
                         ,nhl.savePct as SavePct
+                        ,fif.totalGoals as TotalGoals
+                        ,fif.assists as Assists
+                        ,fif.saves as Saves
                     from core.Players p
                     left join stats.MLBPlayerStats mlb
                         on mlb.playerID = p.playerID
@@ -145,6 +148,9 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                     left join stats.NHLPlayerStats nhl
                         on nhl.playerID = p.playerID
                         and nhl.sportCode = p.sportCode
+                    left join stats.FIFPlayerStats fif
+                        on fif.playerID = p.playerID
+                        and fif.sportCode = p.sportCode
                     where p.playerID = @playerId;";
 
             using var connection = new SqlConnection(base.connectionString);
@@ -362,6 +368,20 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                         insert into stats.NHLPlayerStats(playerID, sportCode, handed, goals, penaltyMinutes, points, savePct)
                         values(@playerId, @sportCode, @handed, @goals, @penaltyMinutes, @points, @savePct);
                     end;",
+            "FIF" => @"
+                    if exists (select 1 from stats.FIFPlayerStats where playerID = @playerId and sportCode = @sportCode)
+                    begin
+                        update stats.FIFPlayerStats
+                        set totalGoals = @totalGoals
+                            ,assists = @assists
+                            ,saves = @saves
+                        where playerID = @playerId and sportCode = @sportCode;
+                    end
+                    else
+                    begin
+                        insert into stats.FIFPlayerStats(playerID, sportCode, totalGoals, assists, saves)
+                        values(@playerId, @sportCode, @totalGoals, @assists, @saves);
+                    end;",
             _ => throw new ArgumentException($"Unsupported sportCode '{sportCode}' for stats upsert.")
         };
 
@@ -385,7 +405,10 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                 goals = stats.Goals,
                 penaltyMinutes = stats.PenaltyMinutes,
                 points = stats.Points,
-                savePct = stats.SavePct
+                savePct = stats.SavePct,
+                totalGoals = stats.TotalGoals,
+                assists = stats.Assists,
+                saves = stats.Saves
             },
             transaction);
 
@@ -406,6 +429,7 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
             "NBA" => @"delete from stats.NBAPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             "NFL" => @"delete from stats.NFLPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             "NHL" => @"delete from stats.NHLPlayerStats where playerID = @playerId and sportCode = @sportCode;",
+            "FIF" => @"delete from stats.FIFPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             _ => throw new ArgumentException($"Unsupported sportCode '{sportCode}' for stats delete.")
         };
 

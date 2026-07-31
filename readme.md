@@ -86,3 +86,8 @@ Dev Note (July 2026):
 
 - Overall API specification (purpose, architecture, setup, endpoint catalog, request/response conventions, usage workflow): [Docs/AgilitySports_API_Overall_Specification.docx](Docs/AgilitySports_API_Overall_Specification.docx)
 - Player/stats contract specification (cross-sport stat field mapping and persistence behavior): [Docs/AgilitySports_API_PlayerStats_Spec.docx](Docs/AgilitySports_API_PlayerStats_Spec.docx)
+- FIF API quick reference (routes, payload expectations, and test links): [Docs/FIF-API.md](Docs/FIF-API.md)
+
+## REST Client Tests
+
+- FIF CRUD REST Client script: [Test/FIF.http](Test/FIF.http)

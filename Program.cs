@@ -24,6 +24,7 @@ ILoggingBuilder logB = builder.Logging.AddLog4Net(
 builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
+builder.Services.AddScoped<IFIFRepo, FIFRepo>();
 builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 builder.Services.AddScoped<IPlayersRepo, PlayersRepo>();
@@ -61,6 +62,7 @@ app.MapNbaEndpoints();
 app.MapNflEndpoints();
 app.MapMlbEndpoints();
 app.MapNhlEndpoints();
+app.MapFifEndpoints();
 app.MapStaticDataEndpoints();
 app.MapPlayersV2Endpoints();
 // Add database health endpoint
