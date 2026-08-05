@@ -25,6 +25,7 @@ builder.Services.AddScoped<INFLRepo, NFLRepo>();
 builder.Services.AddScoped<INHLRepo, NHLRepo>();
 builder.Services.AddScoped<INBARepo, NBARepo>();
 builder.Services.AddScoped<IFIFRepo, FIFRepo>();
+builder.Services.AddScoped<IPGARepo, PGARepo>();
 builder.Services.AddTransient<IColorWheel, ColorWheel>();  // for MLB Colorwheel DI
 builder.Services.AddScoped<IMLBRepo, MLBRepo>();
 builder.Services.AddScoped<IPlayersRepo, PlayersRepo>();
@@ -63,6 +64,7 @@ app.MapNflEndpoints();
 app.MapMlbEndpoints();
 app.MapNhlEndpoints();
 app.MapFifEndpoints();
+app.MapPgaEndpoints();
 app.MapStaticDataEndpoints();
 app.MapPlayersV2Endpoints();
 // Add database health endpoint

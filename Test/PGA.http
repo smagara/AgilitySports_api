@@ -1,0 +1,102 @@
+@url = http://localhost:1106/api/v2/
+
+### list PGA players
+GET {{url}}pga/roster
+
+### get PGA player by playerId (Scottie Scheffler)
+GET {{url}}pga/roster?playerId=106427
+
+### create new PGA player
+POST {{url}}pga/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "teamCode": "PGA",
+    "firstName": "Test",
+    "lastName": "Golfer",
+    "position": "G",
+    "number": null,
+    "height": "72",
+    "weight": "180",
+    "dateOfBirth": "1995-04-12T00:00:00",
+    "birthCityState": "Scottsdale, AZ",
+    "birthCountry": "United States",
+    "college": null,
+    "draftYear": null,
+    "seasonYear": 2026,
+    "wins": 2,
+    "majors": 1,
+    "drivingDistance": 305.4,
+    "scoringAverage": 69.8,
+    "eventsPlayed": 18,
+    "cutsMade": 16
+}
+
+### update PGA player by playerId
+PUT {{url}}pga/roster
+Content-Type: application/json
+
+{
+    "playerId": 9001001,
+    "teamCode": "PGA",
+    "firstName": "Test",
+    "lastName": "Golfer-Updated",
+    "position": "G",
+    "number": null,
+    "height": "72",
+    "weight": "182",
+    "dateOfBirth": "1995-04-12T00:00:00",
+    "birthCityState": "Scottsdale, AZ",
+    "birthCountry": "United States",
+    "college": null,
+    "draftYear": null,
+    "seasonYear": 2026,
+    "wins": 3,
+    "majors": 1,
+    "drivingDistance": 307.1,
+    "scoringAverage": 69.4,
+    "eventsPlayed": 20,
+    "cutsMade": 18
+}
+
+### delete PGA player by playerId
+DELETE {{url}}pga/roster?playerId=9000002
+
+### validation check (missing teamCode)
+POST {{url}}pga/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "firstName": "Bad",
+    "lastName": "Payload",
+    "position": "G"
+}
+
+### validation check (invalid stats)
+POST {{url}}pga/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "teamCode": "PGA",
+    "firstName": "Bad",
+    "lastName": "Stats",
+    "position": "G",
+    "wins": -1,
+    "scoringAverage": -2
+}
+
+### update PGA player that doesn't exist
+PUT {{url}}pga/roster
+Content-Type: application/json
+
+{
+    "playerId": 9990211,
+    "teamCode": "PGA",
+    "firstName": "Missing",
+    "lastName": "Player",
+    "position": "G",
+    "seasonYear": 2026
+}

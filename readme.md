@@ -87,7 +87,14 @@ Dev Note (July 2026):
 - Overall API specification (purpose, architecture, setup, endpoint catalog, request/response conventions, usage workflow): [Docs/AgilitySports_API_Overall_Specification.docx](Docs/AgilitySports_API_Overall_Specification.docx)
 - Player/stats contract specification (cross-sport stat field mapping and persistence behavior): [Docs/AgilitySports_API_PlayerStats_Spec.docx](Docs/AgilitySports_API_PlayerStats_Spec.docx)
 - FIF API quick reference (routes, payload expectations, and test links): [Docs/FIF-API.md](Docs/FIF-API.md)
+- PGA API quick reference (routes, payload expectations, and test links): [Docs/PGA-API.md](Docs/PGA-API.md)
 
 ## REST Client Tests
 
-- FIF CRUD REST Client script: [Test/FIF.http](Test/FIF.http)
+Use the VS Code / Cursor REST Client extension against a running API (`http://localhost:1106`).
+
+- FIF CRUD: [Test/FIF.http](Test/FIF.http)
+- PGA CRUD: [Test/PGA.http](Test/PGA.http)
+- Players V2 (cross-sport, includes FIF/PGA stats): [Test/PlayersV2.http](Test/PlayersV2.http)
+- Static data (positions/teams, includes FIF/PGA): [Test/StaticData.http](Test/StaticData.http)
+- MLB / NBA / NFL / NHL: [Test/MLB.http](Test/MLB.http), [Test/NBA.http](Test/NBA.http), [Test/NFL.http](Test/NFL.http), [Test/NHL.http](Test/NHL.http)

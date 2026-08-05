@@ -164,10 +164,10 @@ public class InputValidationService : IInputValidationService
 
         var number = int.Parse(numbers);
         
-        // Validate reasonable player number range (0-99)
-        if (number < 0 || number > 99)
+        // Validate reasonable player number range (0-999)
+        if (number < 0 || number > 999)
         {
-            return (false, "Player number must be between 0 and 99");
+            return (false, "Player number must be between 0 and 999");
         }
 
         return (true, string.Empty);
@@ -190,7 +190,9 @@ public class InputValidationService : IInputValidationService
             // MLB
             "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS",
             // FIF (FIFA World Cup)
-            "G", "D", "M", "F", "UNK"
+            "G", "D", "M", "F", "UNK",
+            // PGA
+            "G", "UNK"
         };
 
         var cleanInput = input.Trim().ToUpper();
@@ -218,13 +220,14 @@ public class InputValidationService : IInputValidationService
             "NHL" => new[] { "C", "D", "F", "G", "LW", "RW" },
             "MLB" => new[] { "1B", "2B", "3B", "C", "CF", "DH", "LF", "P", "RF", "RP", "SP", "SS" },
             "FIF" => new[] { "G", "D", "M", "F", "UNK" },
+            "PGA" => new[] { "G", "UNK" },
 
             _ => new string[0] // Unknown sport
         };
 
         if (validPositions.Length == 0)
         {
-            return (false, $"Unknown sport '{sport}'. Valid sports: NBA, NFL, NHL, MLB, FIF");
+            return (false, $"Unknown sport '{sport}'. Valid sports: NBA, NFL, NHL, MLB, FIF, PGA");
         }
 
         if (!validPositions.Contains(cleanInput))

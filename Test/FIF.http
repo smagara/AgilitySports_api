@@ -67,3 +67,31 @@ Content-Type: application/json
     "lastName": "Payload",
     "position": "F"
 }
+
+### validation check (invalid stats)
+POST {{url}}fif/roster
+Content-Type: application/json
+
+{
+    "playerId": 0,
+    "teamCode": "USA",
+    "firstName": "Bad",
+    "lastName": "Stats",
+    "position": "F",
+    "totalGoals": -1,
+    "assists": -2,
+    "saves": -3
+}
+
+### update FIF player that doesn't exist
+PUT {{url}}fif/roster
+Content-Type: application/json
+
+{
+    "playerId": 9990211,
+    "teamCode": "USA",
+    "firstName": "Missing",
+    "lastName": "Player",
+    "position": "F",
+    "seasonYear": 2026
+}

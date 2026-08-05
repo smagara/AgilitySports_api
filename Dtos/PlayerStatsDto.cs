@@ -32,4 +32,12 @@ public class PlayerStatsDto
     public int? TotalGoals { get; set; }
     public int? Assists { get; set; }
     public int? Saves { get; set; }
+
+    // PGA
+    public int? Wins { get; set; }
+    public int? Majors { get; set; }
+    public decimal? DrivingDistance { get; set; }
+    public decimal? ScoringAverage { get; set; }
+    public int? EventsPlayed { get; set; }
+    public int? CutsMade { get; set; }
 }
