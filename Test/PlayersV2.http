@@ -3,13 +3,19 @@
 ### list v2 players
 GET {{url}}
 
-### filter v2 players by sport and search
+### filter v2 players by sport and search (NBA)
 GET {{url}}?sportCode=NBA&search=James
+
+### filter v2 players by sport (FIF)
+GET {{url}}?sportCode=FIF&search=Messi
+
+### filter v2 players by sport (PGA)
+GET {{url}}?sportCode=PGA&search=Scheffler
 
 ### get v2 player by id
 GET {{url}}/3001
 
-### create v2 player
+### create v2 player (NBA)
 POST {{url}}
 Content-Type: application/json
 
@@ -29,6 +35,44 @@ Content-Type: application/json
   "seasonYear": 2026
 }
 
+### create v2 player (FIF)
+POST {{url}}
+Content-Type: application/json
+
+{
+  "sportCode": "FIF",
+  "teamCode": "USA",
+  "positionCode": "F",
+  "firstName": "Test",
+  "lastName": "Striker",
+  "dateOfBirth": "1999-01-15",
+  "height": "6'0\"",
+  "weight": 175,
+  "number": 9,
+  "birthCityState": "Dallas, TX",
+  "birthCountry": "United States",
+  "draftYear": 2026,
+  "seasonYear": 2026
+}
+
+### create v2 player (PGA)
+POST {{url}}
+Content-Type: application/json
+
+{
+  "sportCode": "PGA",
+  "teamCode": "PGA",
+  "positionCode": "G",
+  "firstName": "Test",
+  "lastName": "Golfer",
+  "dateOfBirth": "1995-04-12",
+  "height": "6'0\"",
+  "weight": 180,
+  "birthCityState": "Scottsdale, AZ",
+  "birthCountry": "United States",
+  "seasonYear": 2026
+}
+
 ### update v2 player
 PUT {{url}}/3001
 Content-Type: application/json
@@ -43,10 +87,16 @@ Content-Type: application/json
   "seasonYear": 2026
 }
 
-### get v2 player stats
+### get v2 player stats (NBA example id)
 GET {{url}}/3001/stats
 
-### upsert v2 player stats
+### get v2 player stats (FIF example id)
+GET {{url}}/105228/stats
+
+### get v2 player stats (PGA example id)
+GET {{url}}/106427/stats
+
+### upsert v2 player stats (NBA)
 PUT {{url}}/3001/stats
 Content-Type: application/json
 
@@ -54,6 +104,29 @@ Content-Type: application/json
   "pointsPerGame": 18.4,
   "reboundsPerGame": 4.2,
   "assistsPerGame": 7.6
+}
+
+### upsert v2 player stats (FIF)
+PUT {{url}}/105228/stats
+Content-Type: application/json
+
+{
+  "totalGoals": 12,
+  "assists": 8,
+  "saves": 0
+}
+
+### upsert v2 player stats (PGA)
+PUT {{url}}/106427/stats
+Content-Type: application/json
+
+{
+  "wins": 6,
+  "majors": 2,
+  "drivingDistance": 310.2,
+  "scoringAverage": 68.5,
+  "eventsPlayed": 22,
+  "cutsMade": 20
 }
 
 ### delete v2 player

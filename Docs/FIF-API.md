@@ -38,4 +38,5 @@ This document covers the FIFA/FIF roster CRUD endpoints exposed by AgilitySports
 
 Runnable examples are available in:
 
-- [../Test/FIF.http](../Test/FIF.http)
+- [../Test/FIF.http](../Test/FIF.http) — CRUD, validation failures, and missing-player update
+- Related cross-sport scripts: [../Test/PlayersV2.http](../Test/PlayersV2.http), [../Test/StaticData.http](../Test/StaticData.http)

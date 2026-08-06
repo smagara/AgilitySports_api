@@ -135,6 +135,12 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                         ,fif.totalGoals as TotalGoals
                         ,fif.assists as Assists
                         ,fif.saves as Saves
+                        ,pga.wins as Wins
+                        ,pga.majors as Majors
+                        ,pga.drivingDistance as DrivingDistance
+                        ,pga.scoringAverage as ScoringAverage
+                        ,pga.eventsPlayed as EventsPlayed
+                        ,pga.cutsMade as CutsMade
                     from core.Players p
                     left join stats.MLBPlayerStats mlb
                         on mlb.playerID = p.playerID
@@ -151,6 +157,9 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                     left join stats.FIFPlayerStats fif
                         on fif.playerID = p.playerID
                         and fif.sportCode = p.sportCode
+                    left join stats.PGAPlayerStats pga
+                        on pga.playerID = p.playerID
+                        and pga.sportCode = p.sportCode
                     where p.playerID = @playerId;";
 
             using var connection = new SqlConnection(base.connectionString);
@@ -382,6 +391,23 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                         insert into stats.FIFPlayerStats(playerID, sportCode, totalGoals, assists, saves)
                         values(@playerId, @sportCode, @totalGoals, @assists, @saves);
                     end;",
+            "PGA" => @"
+                    if exists (select 1 from stats.PGAPlayerStats where playerID = @playerId and sportCode = @sportCode)
+                    begin
+                        update stats.PGAPlayerStats
+                        set wins = @wins
+                            ,majors = @majors
+                            ,drivingDistance = @drivingDistance
+                            ,scoringAverage = @scoringAverage
+                            ,eventsPlayed = @eventsPlayed
+                            ,cutsMade = @cutsMade
+                        where playerID = @playerId and sportCode = @sportCode;
+                    end
+                    else
+                    begin
+                        insert into stats.PGAPlayerStats(playerID, sportCode, wins, majors, drivingDistance, scoringAverage, eventsPlayed, cutsMade)
+                        values(@playerId, @sportCode, @wins, @majors, @drivingDistance, @scoringAverage, @eventsPlayed, @cutsMade);
+                    end;",
             _ => throw new ArgumentException($"Unsupported sportCode '{sportCode}' for stats upsert.")
         };
 
@@ -408,7 +434,13 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
                 savePct = stats.SavePct,
                 totalGoals = stats.TotalGoals,
                 assists = stats.Assists,
-                saves = stats.Saves
+                saves = stats.Saves,
+                wins = stats.Wins,
+                majors = stats.Majors,
+                drivingDistance = stats.DrivingDistance,
+                scoringAverage = stats.ScoringAverage,
+                eventsPlayed = stats.EventsPlayed,
+                cutsMade = stats.CutsMade
             },
             transaction);
 
@@ -430,6 +462,7 @@ public class PlayersRepo : BaseRepo, IPlayersRepo
             "NFL" => @"delete from stats.NFLPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             "NHL" => @"delete from stats.NHLPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             "FIF" => @"delete from stats.FIFPlayerStats where playerID = @playerId and sportCode = @sportCode;",
+            "PGA" => @"delete from stats.PGAPlayerStats where playerID = @playerId and sportCode = @sportCode;",
             _ => throw new ArgumentException($"Unsupported sportCode '{sportCode}' for stats delete.")
         };
 

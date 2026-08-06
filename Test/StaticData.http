@@ -1,4 +1,4 @@
-@url = http://localhost:1106/api/staticdata
+@url = http://localhost:1106/api/v2/staticdata
 
 ### list of NHL position codes
 GET {{url}}/positions?sport=NHL
@@ -9,5 +9,23 @@ GET {{url}}/positions?sport=NBA
 ### list of NFL position codes
 GET {{url}}/positions?sport=NFL
 
+### list of MLB position codes
+GET {{url}}/positions?sport=MLB
+
+### list of FIF position codes
+GET {{url}}/positions?sport=FIF
+
+### list of PGA position codes
+GET {{url}}/positions?sport=PGA
+
 ### list of NFL position codes (sportCode alias)
 GET {{url}}/positions?sportCode=NFL
+
+### list of FIF teams
+GET {{url}}/teams?sport=FIF
+
+### list of PGA teams
+GET {{url}}/teams?sport=PGA
+
+### list of NBA teams
+GET {{url}}/teams?sport=NBA
