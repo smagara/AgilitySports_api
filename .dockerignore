@@ -1,0 +1,17 @@
+**/.dockerignore
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.github
+**/bin
+**/obj
+**/artifacts
+**/Test
+**/Docs
+**/images
+**/roslyn
+**/*.md
+**/*.user
+**/*.suo
+**/Container/.env
