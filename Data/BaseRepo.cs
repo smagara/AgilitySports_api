@@ -39,7 +39,11 @@ public abstract class BaseRepo
         {
             case "AZURE":
                 isAzureMode = true;
-                connectionString = configuration.GetConnectionString("AzureConnection") ?? "";
+                connectionString = configuration.GetConnectionString("AzureConnectionV2") ?? "";
+                break;
+            case "AZURE_QA":
+                isAzureMode = true;
+                connectionString = configuration.GetConnectionString("AzureConnectionV2_QA") ?? "";
                 break;
             case "DOCKER":
                 isAzureMode = false;
@@ -50,7 +54,7 @@ public abstract class BaseRepo
                 connectionString = configuration.GetConnectionString("LocalConnection") ?? "";
                 break;
             default:
-                throw new ConfigurationErrorsException("Database:Mode must be Azure, Docker, or LocalDb.");
+                throw new ConfigurationErrorsException("Database:Mode must be Azure, Azure_QA, Docker, or LocalDb.");
         }
 
         if (isAzureMode)
